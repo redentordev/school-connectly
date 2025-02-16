@@ -39,3 +39,4 @@ local_settings.py
 Thumbs.db
 
 env
+.env
