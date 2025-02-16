@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
-    command: sh -c "python manage.py migrate && python manage.py create_superuser && python manage.py collectstatic --noinput && /usr/local/bin/gunicorn --bind 0.0.0.0:8000 connectly.wsgi:application"
+    command: sh -c "python manage.py wait_for_db && python manage.py migrate && python manage.py create_superuser && python manage.py collectstatic --noinput && /usr/local/bin/gunicorn --bind 0.0.0.0:8000 connectly.wsgi:application"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
