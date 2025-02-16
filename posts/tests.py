@@ -278,8 +278,10 @@ class PostAPITest(APITestCase):
             'title': 'Image Post',
             'content': 'Image Description',
             'post_type': 'image',
-            'file_size': 1024,
-            'dimensions': {'width': 800, 'height': 600}
+            'metadata': {
+                'file_size': 1024,
+                'dimensions': {'width': 800, 'height': 600}
+            }
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

@@ -35,29 +35,7 @@ class Post(models.Model):
         else:
             self._metadata = None
 
-    def clean(self):
-        """Validate the post based on its type."""
-        super().clean()
-        metadata = self.metadata
-
-        if self.post_type == 'image':
-            if not metadata.get('file_size'):
-                raise ValidationError({'metadata': 'Image posts require file_size in metadata'})
-            if not metadata.get('dimensions'):
-                raise ValidationError({'metadata': 'Image posts require dimensions in metadata'})
-
-        elif self.post_type == 'video':
-            if not metadata.get('duration'):
-                raise ValidationError({'metadata': 'Video posts require duration in metadata'})
-            if not metadata.get('file_size'):
-                raise ValidationError({'metadata': 'Video posts require file_size in metadata'})
-
-        elif self.post_type == 'link':
-            if not metadata.get('url'):
-                raise ValidationError({'metadata': 'Link posts require url in metadata'})
-
     def save(self, *args, **kwargs):
-        self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):

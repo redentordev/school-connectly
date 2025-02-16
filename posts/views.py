@@ -17,6 +17,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from django.contrib.auth.models import User
 from rest_framework.exceptions import PermissionDenied
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 logger = LoggerSingleton().get_logger()
 config = ConfigManager()
@@ -155,11 +157,26 @@ class CommentListCreate(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing users.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAdminUser]
 
+    @swagger_auto_schema(
+        operation_description="List all users",
+        responses={200: UserSerializer(many=True)}
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Create a new user",
+        request_body=UserSerializer,
+        responses={201: UserSerializer()}
+    )
     def create(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
@@ -202,53 +219,68 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class PostViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing posts.
+    """
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
-    def list(self, request, *args, **kwargs):
-        try:
-            # Use configuration for pagination
-            page_size = config.get_setting('DEFAULT_PAGE_SIZE')
-            queryset = self.filter_queryset(self.get_queryset())
-            page = self.paginate_queryset(queryset[:page_size])
-            
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                logger.info(f"Retrieved {len(page)} posts")
-                return self.get_paginated_response(serializer.data)
-
-            serializer = self.get_serializer(queryset, many=True)
-            logger.info(f"Retrieved all posts")
-            return Response(serializer.data)
-        except Exception as e:
-            logger.error(f"Error retrieving posts: {str(e)}")
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-    def create(self, request, *args, **kwargs):
-        try:
-            # Get the post type from request data
-            post_type = request.data.get('post_type', 'text')
-            
-            # Create post using factory
-            post = PostFactory.create_post(
-                post_type=post_type,
-                title=request.data.get('title'),
-                content=request.data.get('content', ''),
-                author_id=request.user.id,
-                **self._extract_metadata(request.data, post_type)
+    @swagger_auto_schema(
+        operation_description="List all posts",
+        responses={200: PostSerializer(many=True)},
+        manual_parameters=[
+            openapi.Parameter(
+                'page_size',
+                openapi.IN_QUERY,
+                description="Number of results to return per page",
+                type=openapi.TYPE_INTEGER,
+                default=10
             )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
-            serializer = self.get_serializer(post)
-            logger.info(f"Successfully created {post_type} post with ID: {post.id}")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except ValueError as e:
-            logger.error(f"Failed to create post: {str(e)}")
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Unexpected error creating post: {str(e)}")
-            return Response({'error': 'An unexpected error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    @swagger_auto_schema(
+        operation_description="Create a new post",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['content', 'post_type'],
+            properties={
+                'title': openapi.Schema(type=openapi.TYPE_STRING),
+                'content': openapi.Schema(type=openapi.TYPE_STRING),
+                'post_type': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=['text', 'image', 'video', 'link']
+                ),
+                'file_size': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'dimensions': openapi.Schema(type=openapi.TYPE_STRING),
+                'duration': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'url': openapi.Schema(type=openapi.TYPE_STRING),
+                'preview_image': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={201: PostSerializer()}
+    )
+    def create(self, request, *args, **kwargs):
+        # If metadata is already properly structured in the request, use it as is
+        if isinstance(request.data.get('metadata'), dict):
+            return super().create(request, *args, **kwargs)
+            
+        # Otherwise, extract metadata fields based on post type
+        post_type = request.data.get('post_type')
+        metadata = self._extract_metadata(request.data, post_type)
+        
+        # Update the request data with processed metadata
+        data = request.data.copy()
+        if metadata:
+            data['metadata'] = metadata
+        
+        # Create a new request object with the modified data
+        request._full_data = data
+        return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         try:
@@ -300,28 +332,54 @@ class PostViewSet(viewsets.ModelViewSet):
         """Extract metadata based on post type."""
         metadata = {}
         if post_type == 'image':
-            metadata = {
-                'file_size': data.get('file_size'),
-                'dimensions': data.get('dimensions')
-            }
+            # Get metadata from either top-level or nested metadata
+            metadata_source = data.get('metadata', {}) if isinstance(data.get('metadata'), dict) else {}
+            file_size = data.get('file_size') or metadata_source.get('file_size')
+            dimensions = data.get('dimensions') or metadata_source.get('dimensions')
+            
+            if file_size is not None:
+                metadata['file_size'] = file_size
+            if dimensions is not None:
+                metadata['dimensions'] = dimensions
         elif post_type == 'video':
-            metadata = {
-                'file_size': data.get('file_size'),
-                'duration': data.get('duration')
-            }
+            metadata_source = data.get('metadata', {}) if isinstance(data.get('metadata'), dict) else {}
+            file_size = data.get('file_size') or metadata_source.get('file_size')
+            duration = data.get('duration') or metadata_source.get('duration')
+            
+            if file_size is not None:
+                metadata['file_size'] = file_size
+            if duration is not None:
+                metadata['duration'] = duration
         elif post_type == 'link':
-            metadata = {
-                'url': data.get('url'),
-                'preview_image': data.get('preview_image')
-            }
+            metadata_source = data.get('metadata', {}) if isinstance(data.get('metadata'), dict) else {}
+            url = data.get('url') or metadata_source.get('url')
+            preview_image = data.get('preview_image') or metadata_source.get('preview_image')
+            
+            if url is not None:
+                metadata['url'] = url
+            if preview_image is not None:
+                metadata['preview_image'] = preview_image
         return metadata
 
+    @swagger_auto_schema(
+        method='post',
+        operation_description="Like a post",
+        responses={
+            200: openapi.Response(
+                description="Post liked successfully",
+                examples={
+                    "application/json": {
+                        "status": "post liked"
+                    }
+                }
+            )
+        }
+    )
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
         try:
             post = self.get_object()
             user = request.user
-            # Add like functionality here
             logger.info(f"User {user.id} liked post {post.id}")
             return Response({'status': 'post liked'})
         except Exception as e:
@@ -330,35 +388,35 @@ class PostViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing comments.
+    """
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
+    @swagger_auto_schema(
+        operation_description="List all comments",
+        responses={200: CommentSerializer(many=True)}
+    )
     def list(self, request, *args, **kwargs):
-        try:
-            queryset = self.filter_queryset(self.get_queryset())
-            serializer = self.get_serializer(queryset, many=True)
-            logger.info("Retrieved all comments")
-            return Response(serializer.data)
-        except Exception as e:
-            logger.error(f"Error retrieving comments: {str(e)}")
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return super().list(request, *args, **kwargs)
 
+    @swagger_auto_schema(
+        operation_description="Create a new comment",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['content', 'post'],
+            properties={
+                'content': openapi.Schema(type=openapi.TYPE_STRING),
+                'post': openapi.Schema(type=openapi.TYPE_INTEGER),
+            }
+        ),
+        responses={201: CommentSerializer()}
+    )
     def create(self, request, *args, **kwargs):
-        try:
-            post_id = request.data.get('post')
-            post = get_object_or_404(Post, id=post_id)
-            
-            serializer = self.get_serializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(author=request.user, post=post)
-                logger.info(f"Created comment on post {post.id}")
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Error creating comment: {str(e)}")
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         try:

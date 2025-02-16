@@ -31,6 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class PostSerializer(serializers.ModelSerializer):
     comments = serializers.StringRelatedField(many=True, read_only=True)
+    metadata = serializers.JSONField(required=False)
 
     class Meta:
         model = Post
@@ -40,6 +41,27 @@ class PostSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
+
+    def validate(self, data):
+        """Validate the post data based on post type."""
+        post_type = data.get('post_type')
+        metadata = data.get('metadata', {})
+
+        if post_type == 'image':
+            if not metadata.get('file_size'):
+                raise serializers.ValidationError({'metadata': 'Image posts require file_size in metadata'})
+            if not metadata.get('dimensions'):
+                raise serializers.ValidationError({'metadata': 'Image posts require dimensions in metadata'})
+        elif post_type == 'video':
+            if not metadata.get('duration'):
+                raise serializers.ValidationError({'metadata': 'Video posts require duration in metadata'})
+            if not metadata.get('file_size'):
+                raise serializers.ValidationError({'metadata': 'Video posts require file_size in metadata'})
+        elif post_type == 'link':
+            if not metadata.get('url'):
+                raise serializers.ValidationError({'metadata': 'Link posts require url in metadata'})
+
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
