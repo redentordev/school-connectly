@@ -9,7 +9,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.authentication import TokenAuthentication
-from .permissions import IsPostAuthor, IsAdminOrReadOnly
+from .permissions import IsPostAuthor, IsAdminOrReadOnly, IsAuthorOrReadOnly
+from factories.post_factory import PostFactory
+from singletons.config_manager import ConfigManager
+from singletons.logger_singleton import LoggerSingleton
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
+
+logger = LoggerSingleton().get_logger()
+config = ConfigManager()
 
 # Create your views here.
 
@@ -142,3 +151,119 @@ class CommentListCreate(APIView):
             serializer.save(author=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthorOrReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            # Get the post type from request data
+            post_type = request.data.get('post_type', 'text')
+            
+            # Extract common fields
+            title = request.data.get('title')
+            content = request.data.get('content', '')
+            author_id = request.user.id
+            
+            # Extract metadata based on post type
+            metadata = {}
+            if post_type == 'image':
+                metadata = {
+                    'file_size': request.data.get('file_size'),
+                    'dimensions': request.data.get('dimensions')
+                }
+            elif post_type == 'video':
+                metadata = {
+                    'file_size': request.data.get('file_size'),
+                    'duration': request.data.get('duration')
+                }
+            elif post_type == 'link':
+                metadata = {
+                    'url': request.data.get('url'),
+                    'preview_image': request.data.get('preview_image')
+                }
+
+            # Create post using factory
+            post = PostFactory.create_post(
+                post_type=post_type,
+                title=title,
+                content=content,
+                author_id=author_id,
+                **metadata
+            )
+
+            serializer = self.get_serializer(post)
+            logger.info(f"Successfully created {post_type} post with ID: {post.id}")
+            
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+        except ValueError as e:
+            logger.error(f"Failed to create post: {str(e)}")
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error creating post: {str(e)}")
+            return Response(
+                {'error': 'An unexpected error occurred'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def list(self, request, *args, **kwargs):
+        # Use configuration for pagination
+        page_size = config.get_setting('DEFAULT_PAGE_SIZE')
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset[:page_size])
+        
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def like(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        
+        # Add like functionality here
+        logger.info(f"User {user.id} liked post {post.id}")
+        return Response({'status': 'post liked'})
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthorOrReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        try:
+            post_id = request.data.get('post')
+            post = get_object_or_404(Post, id=post_id)
+            
+            comment = Comment.objects.create(
+                text=request.data.get('text'),
+                author=request.user,
+                post=post
+            )
+            
+            serializer = self.get_serializer(comment)
+            logger.info(f"Created comment {comment.id} on post {post.id}")
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            logger.error(f"Error creating comment: {str(e)}")
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
