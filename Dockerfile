@@ -4,7 +4,6 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8000
 
 # Set work directory
 WORKDIR /app
@@ -15,24 +14,15 @@ RUN apt-get update \
         postgresql-client \
         build-essential \
         libpq-dev \
-        dos2unix \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
-
-# Fix line endings and make entrypoint executable
-RUN dos2unix docker-entrypoint.sh && \
-    chmod +x docker-entrypoint.sh
-
-# Verify management commands are present
-RUN test -d connectly/management/commands || (echo "Management commands directory not found" && exit 1)
-RUN test -f connectly/management/commands/wait_for_db.py || (echo "wait_for_db.py not found" && exit 1)
 
 # Create directory for static files and set permissions
 RUN mkdir -p /app/staticfiles && \
@@ -46,8 +36,5 @@ RUN useradd -m appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
-EXPOSE 8000
-
-# Use entrypoint script
-ENTRYPOINT ["/app/docker-entrypoint.sh"] 
+# Run gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "connectly.wsgi:application"] 
