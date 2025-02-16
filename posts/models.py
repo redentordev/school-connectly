@@ -1,17 +1,9 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 import json
 
 # Create your models here.
-
-class User(models.Model):
-    username = models.CharField(max_length=100, unique=True)
-    email = models.EmailField(unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.username
-
 
 class Post(models.Model):
     POST_TYPES = [
@@ -79,4 +71,4 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.author.username} on Post {self.post.id}"
+        return f'Comment by {self.author.username} on {self.post.title}'

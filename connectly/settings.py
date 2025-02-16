@@ -122,9 +122,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # Security Settings
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = not DEBUG  # Only redirect to HTTPS in production
+SESSION_COOKIE_SECURE = not DEBUG  # Only use secure cookies in production
+CSRF_COOKIE_SECURE = not DEBUG  # Only use secure CSRF in production
 SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
