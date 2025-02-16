@@ -30,6 +30,8 @@ services:
     restart: always
     networks:
       - default
+    healthcheck:
+      disable: true
 
 volumes:
   postgres_data:
