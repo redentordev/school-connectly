@@ -178,6 +178,9 @@ SWAGGER_SETTINGS = {
     'SUPPORTED_SUBMIT_METHODS': ['get', 'post', 'put', 'delete', 'patch'],
     'OPERATIONS_SORTER': 'alpha',
     'VALIDATOR_URL': None,
+    'PERSIST_AUTH': True,
+    'REFETCH_SCHEMA_WITH_AUTH': True,
+    'FETCH_SCHEMA_WITH_QUERY': True,
 }
 
 # Password Hashers
@@ -196,7 +199,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "http://connectly.redentor.dev",
     "https://connectly.redentor.dev",
+    "http://localhost:8000",
+    "https://localhost:8000",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True  # Temporarily enable this for debugging
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -216,24 +223,32 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'access-control-allow-origin',
+    'access-control-allow-credentials',
 ]
 
 # Security Settings
 CSRF_TRUSTED_ORIGINS = [
     "http://connectly.redentor.dev",
     "https://connectly.redentor.dev",
+    "http://localhost:8000",
+    "https://localhost:8000",
 ]
-CSRF_COOKIE_DOMAIN = "connectly.redentor.dev"
+
+# Temporarily disable some security settings for debugging
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = False
+
 CSRF_USE_SESSIONS = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Session Settings
-SESSION_COOKIE_DOMAIN = "connectly.redentor.dev"
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_HTTPONLY = True
 
 # Additional Security Headers
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
+X_FRAME_OPTIONS = 'SAMEORIGIN'  # Changed from DENY to allow Swagger UI to work properly
