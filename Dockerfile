@@ -24,11 +24,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Create directory for static files
-RUN mkdir -p /app/staticfiles
+# Create directory for static files and set permissions
+RUN mkdir -p /app/staticfiles && \
+    chmod -R 755 /app/staticfiles
 
-# Create non-root user
-RUN useradd -m appuser && chown -R appuser:appuser /app
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Create non-root user and set permissions
+RUN useradd -m appuser && \
+    chown -R appuser:appuser /app
 USER appuser
 
 # Run gunicorn
