@@ -15,7 +15,6 @@ RUN apt-get update \
         build-essential \
         libpq-dev \
         dos2unix \
-        netcat-traditional \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -45,10 +44,6 @@ RUN python manage.py collectstatic --noinput
 RUN useradd -m appuser && \
     chown -R appuser:appuser /app
 USER appuser
-
-# Health check using netcat
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD nc -z localhost 8000 || exit 1
 
 # Use entrypoint script
 CMD ["/app/docker-entrypoint.sh"] 
