@@ -4,6 +4,7 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PORT=8000
 
 # Set work directory
 WORKDIR /app
@@ -20,7 +21,7 @@ RUN apt-get update \
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
 # Copy project files
 COPY . .
@@ -45,5 +46,8 @@ RUN useradd -m appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
+# Expose port
+EXPOSE 8000
+
 # Use entrypoint script
-CMD ["/app/docker-entrypoint.sh"] 
+ENTRYPOINT ["/app/docker-entrypoint.sh"] 
