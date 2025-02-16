@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.authtoken import views as token_views
-from .views import UserListCreate, PostListCreate, PostDetailView, CommentListCreate
+from .views import UserListCreate, PostListCreate, PostDetailView, CommentListCreate, UserDetailView
 
 urlpatterns = [
     # Authentication endpoints
@@ -8,6 +8,7 @@ urlpatterns = [
     
     # User endpoints
     path('users/', UserListCreate.as_view(), name='user-list-create'),
+    path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
     
     # Post endpoints
     path('posts/', PostListCreate.as_view(), name='post-list-create'),

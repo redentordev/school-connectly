@@ -4,6 +4,11 @@ from .models import Post, User
 from factories.post_factory import PostFactory
 from singletons.config_manager import ConfigManager
 from singletons.logger_singleton import LoggerSingleton
+from rest_framework.test import APITestCase
+from rest_framework import status
+from django.urls import reverse
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User as AuthUser
 
 
 class SingletonPatternsTest(TestCase):
@@ -137,3 +142,71 @@ class PostFactoryTest(TestCase):
                 author_id=self.user.id,
                 # Missing url
             )
+
+
+class UserAPITest(APITestCase):
+    def setUp(self):
+        # Create an admin user
+        self.admin_user = AuthUser.objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='adminpass123'
+        )
+        # Create a token for the admin user
+        self.admin_token = Token.objects.create(user=self.admin_user)
+        
+        # Create a test user
+        self.test_user = User.objects.create(
+            username='testuser',
+            email='test@example.com'
+        )
+        
+        # Set up authentication
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.admin_token.key}')
+
+    def test_create_user(self):
+        """Test creating a new user"""
+        url = reverse('user-list-create')
+        data = {
+            'username': 'newuser',
+            'email': 'newuser@example.com'
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.count(), 2)
+        self.assertEqual(User.objects.get(username='newuser').email, 'newuser@example.com')
+
+    def test_update_user(self):
+        """Test updating an existing user"""
+        url = reverse('user-detail', kwargs={'pk': self.test_user.pk})
+        data = {
+            'email': 'updated@example.com'
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.test_user.refresh_from_db()
+        self.assertEqual(self.test_user.email, 'updated@example.com')
+
+    def test_delete_user(self):
+        """Test deleting a user"""
+        url = reverse('user-detail', kwargs={'pk': self.test_user.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(User.objects.count(), 1)
+
+    def test_get_user_detail(self):
+        """Test retrieving a specific user"""
+        url = reverse('user-detail', kwargs={'pk': self.test_user.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], self.test_user.username)
+
+    def test_unauthorized_access(self):
+        """Test that unauthorized users cannot access the endpoints"""
+        # Remove authentication
+        self.client.credentials()
+        
+        # Try to access user detail
+        url = reverse('user-detail', kwargs={'pk': self.test_user.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
