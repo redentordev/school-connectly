@@ -11,15 +11,23 @@ class UserSerializer(serializers.ModelSerializer):
 
 # Serializer for Task model with validation for assigned_to
 class TaskSerializer(serializers.ModelSerializer):
-    # String representation of the assigned user for readability
-    assigned_to = serializers.StringRelatedField(read_only=True)
+    # String representation of the assigned user for readability in GET requests
+    assigned_to_name = serializers.StringRelatedField(source='assigned_to', read_only=True)
 
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'assigned_to', 'created_at']
+        fields = ['id', 'title', 'description', 'assigned_to', 'assigned_to_name', 'created_at']
 
-    # Custom validation to ensure the assigned user exists
     def validate_assigned_to(self, value):
-        if not User.objects.filter(id=value.id).exists():
-            raise serializers.ValidationError("Assigned user does not exist.")
-        return value 
+        try:
+            # Check if the user exists
+            if isinstance(value, User):
+                user_id = value.id
+            else:
+                user_id = int(value)
+            
+            if not User.objects.filter(id=user_id).exists():
+                raise serializers.ValidationError("Assigned user does not exist.")
+            return value
+        except (ValueError, TypeError):
+            raise serializers.ValidationError("Invalid user ID format.") 
