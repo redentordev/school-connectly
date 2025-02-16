@@ -16,7 +16,6 @@ RUN apt-get update \
         build-essential \
         libpq-dev \
         dos2unix \
-        curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
