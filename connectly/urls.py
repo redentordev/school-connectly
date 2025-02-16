@@ -21,6 +21,10 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.conf import settings
 
+# Construct the server URL
+PROTOCOL = "https" if settings.CSRF_COOKIE_SECURE else "http"
+SERVER_URL = f"{PROTOCOL}://{settings.ALLOWED_HOSTS[0]}" if settings.ALLOWED_HOSTS else "http://localhost:8000"
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Connectly API",
@@ -32,7 +36,7 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
-    url=settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else None,
+    url=SERVER_URL,
 )
 
 urlpatterns = [

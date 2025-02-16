@@ -181,6 +181,9 @@ SWAGGER_SETTINGS = {
     'PERSIST_AUTH': True,
     'REFETCH_SCHEMA_WITH_AUTH': True,
     'FETCH_SCHEMA_WITH_QUERY': True,
+    'DEFAULT_INFO': None,
+    'DISPLAY_OPERATION_ID': False,
+    'USE_ABSOLUTE_PATHS': True,
 }
 
 # Password Hashers
