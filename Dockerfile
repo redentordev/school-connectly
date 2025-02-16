@@ -45,5 +45,8 @@ RUN useradd -m appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
+# Explicitly disable healthcheck
+HEALTHCHECK NONE
+
 # Use entrypoint script
 CMD ["/app/docker-entrypoint.sh"] 
