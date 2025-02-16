@@ -1,9 +1,22 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=connectly
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - default
+
   web:
     build: .
-    command: sh -c "python manage.py wait_for_db && python manage.py migrate && python manage.py create_superuser && python manage.py collectstatic --noinput && /usr/local/bin/gunicorn --bind 0.0.0.0:8000 connectly.wsgi:application"
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
@@ -12,15 +25,18 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    depends_on:
+      - db
     restart: always
     networks:
       - default
 
 volumes:
+  postgres_data:
   static_volume:
   media_volume:
 
 networks:
   default:
     external: true
-    name: connectly_network 
+    name: connectly_network
