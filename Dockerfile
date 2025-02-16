@@ -14,6 +14,8 @@ RUN apt-get update \
         postgresql-client \
         build-essential \
         libpq-dev \
+        dos2unix \
+        netcat-traditional \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,6 +25,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
+
+# Fix line endings and make entrypoint executable
+RUN dos2unix docker-entrypoint.sh && \
+    chmod +x docker-entrypoint.sh
 
 # Verify management commands are present
 RUN test -d connectly/management/commands || (echo "Management commands directory not found" && exit 1)
@@ -35,17 +41,14 @@ RUN mkdir -p /app/staticfiles && \
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Set up entrypoint script
-RUN chmod +x /app/docker-entrypoint.sh
-
 # Create non-root user and set permissions
 RUN useradd -m appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
-# Health check
+# Health check using netcat
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/admin/')"
+    CMD nc -z localhost 8000 || exit 1
 
 # Use entrypoint script
 CMD ["/app/docker-entrypoint.sh"] 

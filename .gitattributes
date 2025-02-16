@@ -1,0 +1,6 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Force shell scripts to use LF
+*.sh text eol=lf
+docker-entrypoint.sh text eol=lf 
