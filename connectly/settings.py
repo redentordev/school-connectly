@@ -169,11 +169,11 @@ REST_FRAMEWORK = {
 # Swagger Settings
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'Bearer': {
+        'Token': {
             'type': 'apiKey',
             'name': 'Authorization',
             'in': 'header',
-            'description': 'Type in the *\'Value\'* input box below: **\'Token &lt;TOKEN&gt;\'**, where &lt;TOKEN&gt; is the token you got from the auth endpoint.'
+            'description': 'Enter your token in the format: Token <your_token_here>'
         }
     },
     'USE_SESSION_AUTH': False,
@@ -184,9 +184,6 @@ SWAGGER_SETTINGS = {
     'PERSIST_AUTH': True,
     'REFETCH_SCHEMA_WITH_AUTH': True,
     'FETCH_SCHEMA_WITH_QUERY': True,
-    'DEFAULT_INFO': None,
-    'DISPLAY_OPERATION_ID': False,
-    'USE_ABSOLUTE_PATHS': True,
 }
 
 # Password Hashers
@@ -209,7 +206,9 @@ CORS_ALLOWED_ORIGINS = [
     "https://localhost:8000",
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # Temporarily enable this for debugging
+# Comment out CORS_ALLOW_ALL_ORIGINS for security
+# CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     'DELETE',

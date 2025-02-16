@@ -39,6 +39,7 @@ schema_view = get_schema_view(
     public=True,
     permission_classes=(permissions.AllowAny,),
     url=SERVER_URL,
+    patterns=[path('api/', include('posts.urls'))],  # Only include API endpoints
 )
 
 urlpatterns = [
@@ -50,11 +51,8 @@ urlpatterns = [
     # API endpoints
     path('api/', include('posts.urls')),
     
-    # Swagger documentation - both at root and /swagger/ for convenience
-    path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui-alt'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    
-    # OpenAPI schema
+    # Swagger documentation
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
