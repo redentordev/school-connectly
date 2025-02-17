@@ -187,6 +187,7 @@ SWAGGER_SETTINGS = {
     'PERSIST_AUTH': True,
     'REFETCH_SCHEMA_WITH_AUTH': True,
     'FETCH_SCHEMA_WITH_QUERY': True,
+    'SCHEME': 'https'  # Force HTTPS scheme
 }
 
 # Password Hashers

@@ -25,8 +25,8 @@ from rest_framework.authtoken.views import obtain_auth_token
 from django.http import HttpResponse
 
 # Construct the server URL
-PROTOCOL = "https" if settings.CSRF_COOKIE_SECURE else "http"
-SERVER_URL = f"{PROTOCOL}://{settings.ALLOWED_HOSTS[0]}" if settings.ALLOWED_HOSTS else "http://localhost:8000"
+PROTOCOL = "https"  # Force HTTPS
+SERVER_URL = f"{PROTOCOL}://{settings.ALLOWED_HOSTS[0]}" if settings.ALLOWED_HOSTS else f"{PROTOCOL}://localhost:8000"
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -41,6 +41,7 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
     url=SERVER_URL,
     patterns=[path('api/', include('posts.urls'))],  # Only include API endpoints
+    schemes=['https']  # Force HTTPS scheme
 )
 
 def health_check(request):
