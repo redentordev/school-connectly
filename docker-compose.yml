@@ -31,10 +31,11 @@ services:
         condition: service_healthy
     restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      test: ["CMD-SHELL", "curl --fail http://localhost:8000/health/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
     networks:
       - connectly_network
 
