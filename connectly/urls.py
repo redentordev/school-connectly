@@ -41,7 +41,6 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
     url=SERVER_URL,
     patterns=[path('api/', include('posts.urls'))],  # Only include API endpoints
-    schemes=['https']  # Force HTTPS scheme
 )
 
 def health_check(request):
