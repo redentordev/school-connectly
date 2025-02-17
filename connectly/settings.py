@@ -142,12 +142,15 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Security Settings
-SECURE_SSL_REDIRECT = bool(int(os.getenv('SECURE_SSL_REDIRECT', '0')))
-SESSION_COOKIE_SECURE = bool(int(os.getenv('SESSION_COOKIE_SECURE', '0')))
-CSRF_COOKIE_SECURE = bool(int(os.getenv('CSRF_COOKIE_SECURE', '0')))
+SECURE_SSL_REDIRECT = bool(int(os.getenv('SECURE_SSL_REDIRECT', '1')))
+SESSION_COOKIE_SECURE = bool(int(os.getenv('SESSION_COOKIE_SECURE', '1')))
+CSRF_COOKIE_SECURE = bool(int(os.getenv('CSRF_COOKIE_SECURE', '1')))
 SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
 
 # REST Framework Settings
 REST_FRAMEWORK = {
@@ -200,7 +203,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS Settings
 CORS_ALLOWED_ORIGINS = [
-    "http://connectly.redentor.dev",
     "https://connectly.redentor.dev",
     "http://localhost:8000",
     "https://localhost:8000",
@@ -239,9 +241,8 @@ CORS_EXPOSE_HEADERS = [
     'access-control-allow-credentials',
 ]
 
-# Security Settings
+# CSRF Settings
 CSRF_TRUSTED_ORIGINS = [
-    "http://connectly.redentor.dev",
     "https://connectly.redentor.dev",
     "http://localhost:8000",
     "https://localhost:8000",
@@ -261,7 +262,31 @@ CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_HTTPONLY = True
 
-# Additional Security Headers
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'SAMEORIGIN'  # Changed from DENY to allow Swagger UI to work properly
+# Cache settings for production
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}

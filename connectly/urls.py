@@ -22,6 +22,7 @@ from drf_yasg import openapi
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authtoken.views import obtain_auth_token
+from django.http import HttpResponse
 
 # Construct the server URL
 PROTOCOL = "https" if settings.CSRF_COOKIE_SECURE else "http"
@@ -42,6 +43,9 @@ schema_view = get_schema_view(
     patterns=[path('api/', include('posts.urls'))],  # Only include API endpoints
 )
 
+def health_check(request):
+    return HttpResponse("OK")
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     
@@ -55,4 +59,5 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('health/', health_check, name='health_check'),
 ]
