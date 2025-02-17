@@ -9,11 +9,6 @@ services:
       - POSTGRES_DB=connectly
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - connectly_network
 
@@ -27,15 +22,8 @@ services:
     env_file:
       - .env
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:8000/health/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     networks:
       - connectly_network
 
