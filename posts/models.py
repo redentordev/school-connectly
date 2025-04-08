@@ -12,12 +12,18 @@ class Post(models.Model):
         ('video', 'Video Post'),
         ('link', 'Link Post'),
     ]
+    
+    PRIVACY_CHOICES = [
+        ('public', 'Public'),
+        ('private', 'Private'),
+    ]
 
     title = models.CharField(max_length=200, null=True, blank=True)
     content = models.TextField()
     author = models.ForeignKey(User, related_name='posts', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     post_type = models.CharField(max_length=10, choices=POST_TYPES, default='text')
+    privacy = models.CharField(max_length=10, choices=PRIVACY_CHOICES, default='public')
     _metadata = models.TextField(blank=True, null=True, db_column='metadata')
 
     @property

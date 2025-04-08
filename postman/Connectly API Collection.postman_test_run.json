@@ -1,22 +1,22 @@
 {
-	"id": "82538671-4044-48b6-a392-83e27bf1a713",
+	"id": "3dbacfc9-0e19-4fe3-a65e-210b8b4b91e5",
 	"name": "Connectly API Collection",
-	"timestamp": "2025-04-08T11:50:25.420Z",
-	"collection_id": "36188333-bb7a9353-8140-44f2-be75-d2e323467760",
+	"timestamp": "2025-04-08T14:06:21.508Z",
+	"collection_id": "36188333-f50b3461-cdd6-4653-bef5-c8c607d8c9d2",
 	"folder_id": 0,
-	"environment_id": "36188333-5e41767d-14e3-4186-85c1-0af6c01d52b3",
-	"totalPass": 8,
+	"environment_id": "36188333-d6ecfb67-c92b-475a-bf8c-ab12f39c4401",
+	"totalPass": 23,
 	"delay": 0,
 	"persist": true,
 	"status": "finished",
-	"startedAt": "2025-04-08T11:50:22.230Z",
-	"totalFail": 0,
+	"startedAt": "2025-04-08T14:06:15.346Z",
+	"totalFail": 4,
 	"results": [
 		{
-			"id": "ddf33b12-f948-42e9-aa62-155d0498728d",
+			"id": "32a9fbad-de1a-42a9-9761-b2424243c321",
 			"name": "Get Auth Token",
 			"url": "http://localhost:8000/api/auth/token/",
-			"time": 47,
+			"time": 61,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -31,7 +31,7 @@
 				}
 			},
 			"times": [
-				47
+				61
 			],
 			"allTests": [
 				{
@@ -40,10 +40,10 @@
 			]
 		},
 		{
-			"id": "b0f56f3c-eabc-4988-86d4-d8652e12f148",
+			"id": "d8748e78-1153-4f2d-a493-f8092c07b515",
 			"name": "Google OAuth Login",
 			"url": "http://localhost:8000/api/auth/google/",
-			"time": 4,
+			"time": 3,
 			"responseCode": {
 				"code": 405,
 				"name": "Method Not Allowed"
@@ -51,17 +51,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				4
+				3
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "68d8e935-7465-4973-83cb-0d0142f703db",
+			"id": "5ba7ed85-f288-4f7a-bf0f-c1b00182cf8d",
 			"name": "OAuth Demo Page",
 			"url": "http://localhost:8000/api/auth/demo/",
-			"time": 2,
+			"time": 6,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -69,367 +69,16 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				2
+				6
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "e48f4a73-02c0-4888-aa0d-fac49428eec5",
+			"id": "648638bb-69f2-48a2-b477-c3ac886df4d9",
 			"name": "List Users",
 			"url": "http://localhost:8000/api/users/",
-			"time": 4,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				4
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "be881209-7f13-4da5-be23-23da85e7dfcc",
-			"name": "Create User",
-			"url": "http://localhost:8000/api/users/",
-			"time": 65,
-			"responseCode": {
-				"code": 201,
-				"name": "Created"
-			},
-			"tests": {
-				"User created successfully": true
-			},
-			"testPassFailCounts": {
-				"User created successfully": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				65
-			],
-			"allTests": [
-				{
-					"User created successfully": true
-				}
-			]
-		},
-		{
-			"id": "d93b8d3d-f969-430e-b785-d5403b232c82",
-			"name": "Get User Details",
-			"url": "http://localhost:8000/api/users/5/",
-			"time": 5,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				5
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "965ab3c1-dfd0-430f-9ea6-61750cfcb959",
-			"name": "Update User",
-			"url": "http://localhost:8000/api/users/5/",
-			"time": 21,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				21
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "ff247742-0473-4210-8515-6339ea2a09b3",
-			"name": "Delete User",
-			"url": "http://localhost:8000/api/users/5/",
-			"time": 23,
-			"responseCode": {
-				"code": 204,
-				"name": "No Content"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				23
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "11172a31-9f78-4afa-a34b-fc5fdb3322e8",
-			"name": "List Posts",
-			"url": "http://localhost:8000/api/posts/?page=1&page_size=10",
-			"time": 15,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				15
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "4fd199f3-f5fa-450e-95c7-0a38be8db0a7",
-			"name": "Create Text Post",
-			"url": "http://localhost:8000/api/posts/",
-			"time": 22,
-			"responseCode": {
-				"code": 201,
-				"name": "Created"
-			},
-			"tests": {
-				"Post created successfully": true
-			},
-			"testPassFailCounts": {
-				"Post created successfully": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				22
-			],
-			"allTests": [
-				{
-					"Post created successfully": true
-				}
-			]
-		},
-		{
-			"id": "3beb5cd2-cfcb-4c7a-a5b9-48b3d09f410d",
-			"name": "Create Image Post",
-			"url": "http://localhost:8000/api/posts/",
-			"time": 24,
-			"responseCode": {
-				"code": 201,
-				"name": "Created"
-			},
-			"tests": {
-				"Image post created successfully": true
-			},
-			"testPassFailCounts": {
-				"Image post created successfully": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				24
-			],
-			"allTests": [
-				{
-					"Image post created successfully": true
-				}
-			]
-		},
-		{
-			"id": "59176ed4-fcd2-4c77-b7a2-9c4fc2e0e720",
-			"name": "Create Video Post",
-			"url": "http://localhost:8000/api/posts/",
-			"time": 22,
-			"responseCode": {
-				"code": 201,
-				"name": "Created"
-			},
-			"tests": {
-				"Video post created successfully": true
-			},
-			"testPassFailCounts": {
-				"Video post created successfully": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				22
-			],
-			"allTests": [
-				{
-					"Video post created successfully": true
-				}
-			]
-		},
-		{
-			"id": "f1436137-a118-4b38-843a-e6a93e42dc2a",
-			"name": "Create Link Post",
-			"url": "http://localhost:8000/api/posts/",
-			"time": 22,
-			"responseCode": {
-				"code": 201,
-				"name": "Created"
-			},
-			"tests": {
-				"Link post created successfully": true
-			},
-			"testPassFailCounts": {
-				"Link post created successfully": {
-					"pass": 1,
-					"fail": 0
-				}
-			},
-			"times": [
-				22
-			],
-			"allTests": [
-				{
-					"Link post created successfully": true
-				}
-			]
-		},
-		{
-			"id": "f6c80975-05d1-42b0-9f5c-c1da4a328312",
-			"name": "Get Post Details",
-			"url": "http://localhost:8000/api/posts/12/",
-			"time": 6,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				6
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "a2dccfb0-c092-4711-b369-d686d3d71772",
-			"name": "Update Post",
-			"url": "http://localhost:8000/api/posts/12/",
-			"time": 22,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				22
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "5cd0c4c5-33f6-419d-bb10-16c25feb8f8b",
-			"name": "Delete Post",
-			"url": "http://localhost:8000/api/posts/12/",
-			"time": 22,
-			"responseCode": {
-				"code": 204,
-				"name": "No Content"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				22
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "1e03cee8-4ba4-490b-996d-b1cb054f851b",
-			"name": "Like Post",
-			"url": "http://localhost:8000/api/posts/13/like/",
-			"time": 19,
-			"responseCode": {
-				"code": 201,
-				"name": "Created"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				19
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "040b8cff-33e1-4529-87ec-0d4b34edecd7",
-			"name": "Unlike Post",
-			"url": "http://localhost:8000/api/posts/13/unlike/",
-			"time": 21,
-			"responseCode": {
-				"code": 204,
-				"name": "No Content"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				21
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "83211f14-d8be-4a78-93a0-8e96d46a7f83",
-			"name": "Get News Feed",
-			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&filter=all",
-			"time": 9,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				9
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "3326738f-bbbf-4bbe-b20b-c645f9a24e26",
-			"name": "Get Filtered Feed by Type",
-			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&filter=all&post_type=image",
-			"time": 6,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				6
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "d697a644-eb4e-4a76-80b7-0212080f487d",
-			"name": "Get Liked Posts Feed",
-			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&filter=liked",
 			"time": 7,
 			"responseCode": {
 				"code": 200,
@@ -445,90 +94,36 @@
 			]
 		},
 		{
-			"id": "fe5a9aac-699f-45e7-8569-f83a7ed2ca9c",
-			"name": "Get Own Posts Feed",
-			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&filter=own",
-			"time": 8,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				8
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "36611241-185c-486f-96f4-2df9e7c6c6a8",
-			"name": "Get Metadata Filtered Feed",
-			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&metadata_key=file_size&metadata_min=1000",
-			"time": 9,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				9
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "e0d459cb-0c26-4561-a957-e87578990266",
-			"name": "List Comments",
-			"url": "http://localhost:8000/api/comments/",
-			"time": 4,
-			"responseCode": {
-				"code": 200,
-				"name": "OK"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				4
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "258d3887-85d4-4b91-97eb-390736768f97",
-			"name": "Create Comment",
-			"url": "http://localhost:8000/api/comments/",
-			"time": 18,
+			"id": "474b11a1-9311-4353-92b3-4dfdd6a8964e",
+			"name": "Create User",
+			"url": "http://localhost:8000/api/users/",
+			"time": 64,
 			"responseCode": {
 				"code": 201,
 				"name": "Created"
 			},
 			"tests": {
-				"Comment created successfully": true
+				"User created successfully": true
 			},
 			"testPassFailCounts": {
-				"Comment created successfully": {
+				"User created successfully": {
 					"pass": 1,
 					"fail": 0
 				}
 			},
 			"times": [
-				18
+				64
 			],
 			"allTests": [
 				{
-					"Comment created successfully": true
+					"User created successfully": true
 				}
 			]
 		},
 		{
-			"id": "c9c8f252-2199-428f-8eea-9c421f107c91",
-			"name": "Get Comment Details",
-			"url": "http://localhost:8000/api/comments/6/",
+			"id": "0e0d6c9a-26c9-4f8f-9569-dd0443812099",
+			"name": "Get User Details",
+			"url": "http://localhost:8000/api/users/45/",
 			"time": 5,
 			"responseCode": {
 				"code": 200,
@@ -544,10 +139,10 @@
 			]
 		},
 		{
-			"id": "72f1cb4b-6a91-4861-a1c6-737c196bed53",
-			"name": "Update Comment",
-			"url": "http://localhost:8000/api/comments/6/",
-			"time": 17,
+			"id": "2ae26b2a-5a58-4844-9f7c-8c9eb9ab0948",
+			"name": "Update User",
+			"url": "http://localhost:8000/api/users/45/",
+			"time": 27,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -555,17 +150,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				17
+				27
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "687b3892-995b-4a96-b3af-c79864d37ce7",
-			"name": "Delete Comment",
-			"url": "http://localhost:8000/api/comments/6/",
-			"time": 17,
+			"id": "02ab16da-4ccd-44e3-abce-394dae3bf999",
+			"name": "Delete User",
+			"url": "http://localhost:8000/api/users/45/",
+			"time": 19,
 			"responseCode": {
 				"code": 204,
 				"name": "No Content"
@@ -573,17 +168,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				17
+				19
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "0c09e0af-34b9-4a80-96b3-3aeef5f9dfe6",
-			"name": "Get Post Comments",
-			"url": "http://localhost:8000/api/posts/14/comments/",
-			"time": 5,
+			"id": "9522b5f1-128d-4725-828c-7cbd4f952666",
+			"name": "List Posts",
+			"url": "http://localhost:8000/api/posts/?page=1&page_size=10",
+			"time": 22,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -591,44 +186,125 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				5
+				22
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "01606c2f-6b8d-4323-aaaa-e82d9430662a",
-			"name": "Add Comment to Post",
-			"url": "http://localhost:8000/api/posts/15/comment/",
-			"time": 24,
+			"id": "7df05063-c9da-494c-bd5a-14ba71efdd2d",
+			"name": "Create Text Post",
+			"url": "http://localhost:8000/api/posts/",
+			"time": 17,
 			"responseCode": {
 				"code": 201,
 				"name": "Created"
 			},
 			"tests": {
-				"Direct comment created successfully": true
+				"Post created successfully": true
 			},
 			"testPassFailCounts": {
-				"Direct comment created successfully": {
+				"Post created successfully": {
 					"pass": 1,
 					"fail": 0
 				}
 			},
 			"times": [
-				24
+				17
 			],
 			"allTests": [
 				{
-					"Direct comment created successfully": true
+					"Post created successfully": true
 				}
 			]
 		},
 		{
-			"id": "f21d2aca-f27a-4359-9b12-7d606e1c9bd1",
-			"name": "Swagger UI",
-			"url": "http://localhost:8000/swagger/",
-			"time": 3,
+			"id": "2833c5b9-ff5f-44dd-bd00-326f09f4671c",
+			"name": "Create Image Post",
+			"url": "http://localhost:8000/api/posts/",
+			"time": 5,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Image post creation failed with expected validation error": true
+			},
+			"testPassFailCounts": {
+				"Image post creation failed with expected validation error": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				5
+			],
+			"allTests": [
+				{
+					"Image post creation failed with expected validation error": true
+				}
+			]
+		},
+		{
+			"id": "04e5520c-e60d-45d9-a958-fa73e67e1b74",
+			"name": "Create Video Post",
+			"url": "http://localhost:8000/api/posts/",
+			"time": 7,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Video post creation failed with expected validation error": true
+			},
+			"testPassFailCounts": {
+				"Video post creation failed with expected validation error": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				7
+			],
+			"allTests": [
+				{
+					"Video post creation failed with expected validation error": true
+				}
+			]
+		},
+		{
+			"id": "78375c3f-98e6-4ca6-bdb4-6f58d9daa5ae",
+			"name": "Create Link Post",
+			"url": "http://localhost:8000/api/posts/",
+			"time": 6,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Link post creation failed with expected validation error": true
+			},
+			"testPassFailCounts": {
+				"Link post creation failed with expected validation error": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				6
+			],
+			"allTests": [
+				{
+					"Link post creation failed with expected validation error": true
+				}
+			]
+		},
+		{
+			"id": "1e9dbbfa-44f6-47c1-984c-708c19dab15d",
+			"name": "Get Post Details",
+			"url": "http://localhost:8000/api/posts/98/",
+			"time": 11,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -636,16 +312,142 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				3
+				11
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "214339d6-ca1a-4fdc-bbeb-c5bd8e9e14c7",
-			"name": "Swagger JSON",
-			"url": "http://localhost:8000/swagger.json",
+			"id": "f4e764e6-8899-4b2b-9422-16fdc137e1f2",
+			"name": "Like Post",
+			"url": "http://localhost:8000/api/posts/98/like/",
+			"time": 19,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Status code indicates success": true
+			},
+			"testPassFailCounts": {
+				"Status code indicates success": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				19
+			],
+			"allTests": [
+				{
+					"Status code indicates success": true
+				}
+			]
+		},
+		{
+			"id": "479fb18b-2280-453d-8402-346b13b3f3f1",
+			"name": "Unlike Post",
+			"url": "http://localhost:8000/api/posts/98/unlike/",
+			"time": 17,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {
+				"Status code indicates success": true
+			},
+			"testPassFailCounts": {
+				"Status code indicates success": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"Status code indicates success": true
+				}
+			]
+		},
+		{
+			"id": "94da4e31-dbd6-4471-9eee-86345cbf4b9a",
+			"name": "Get News Feed",
+			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&filter=all",
+			"time": 38,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				38
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0609e197-6e80-4d57-9d9b-6156853e52e6",
+			"name": "Get Filtered Feed by Type",
+			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&filter=all&post_type=image",
+			"time": 14,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				14
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "e2ee9120-1bdf-43b7-84b3-aa91eacd5653",
+			"name": "Get Liked Posts Feed",
+			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&filter=liked",
+			"time": 18,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				18
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b3225ff2-82b4-4eb1-b2a4-b10bdbcb3e22",
+			"name": "Get Own Posts Feed",
+			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&filter=own",
+			"time": 34,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				34
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "ae01f8f6-d188-4544-8269-946c9d00f9c9",
+			"name": "Get Metadata Filtered Feed",
+			"url": "http://localhost:8000/api/feed/?page=1&page_size=20&metadata_key=file_size&metadata_min=1000",
 			"time": 16,
 			"responseCode": {
 				"code": 200,
@@ -661,10 +463,10 @@
 			]
 		},
 		{
-			"id": "4c5dcfa8-47c4-4ee4-babd-c4b8c05ddd48",
-			"name": "ReDoc UI",
-			"url": "http://localhost:8000/redoc/",
-			"time": 2,
+			"id": "4516b34e-b0aa-462b-9246-ec9868eec06b",
+			"name": "Update Post",
+			"url": "http://localhost:8000/api/posts/98/",
+			"time": 19,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -672,14 +474,257 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				2
+				19
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "63d4b1fd-9b92-4cf9-84b4-43c64053049a",
+			"id": "8548f206-018d-4b18-947c-1d786d42e767",
+			"name": "Delete Post",
+			"url": "http://localhost:8000/api/posts/98/",
+			"time": 18,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				18
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "082c998f-9b51-4f99-a0c5-2955d7a470e4",
+			"name": "List Comments",
+			"url": "http://localhost:8000/api/comments/?page=1&page_size=10",
+			"time": 24,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				24
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b6032975-80f5-4f03-9377-c1d8f5427d75",
+			"name": "Create Comment",
+			"url": "http://localhost:8000/api/comments/",
+			"time": 18,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Comment creation successful": true
+			},
+			"testPassFailCounts": {
+				"Comment creation successful": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				18
+			],
+			"allTests": [
+				{
+					"Comment creation successful": true
+				}
+			]
+		},
+		{
+			"id": "59ba536c-7328-4d0c-918e-7bc3d7766acd",
+			"name": "Get Post Comments",
+			"url": "http://localhost:8000/api/posts/99/comments/?page=1&page_size=10",
+			"time": 7,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				7
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "121fb95a-28ce-47dd-934b-6977cb19d391",
+			"name": "Add Comment to Post",
+			"url": "http://localhost:8000/api/posts/99/comment/",
+			"time": 17,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {
+				"Direct comment creation successful": true
+			},
+			"testPassFailCounts": {
+				"Direct comment creation successful": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"Direct comment creation successful": true
+				}
+			]
+		},
+		{
+			"id": "23a8406d-6da7-4a3b-9297-9bf5c04e4915",
+			"name": "Get Comment",
+			"url": "http://localhost:8000/api/comments/52/",
+			"time": 7,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Comment retrieved successfully": true
+			},
+			"testPassFailCounts": {
+				"Comment retrieved successfully": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				7
+			],
+			"allTests": [
+				{
+					"Comment retrieved successfully": true
+				}
+			]
+		},
+		{
+			"id": "44aab905-c9c7-4a7b-bc3f-76cf9cebf1ac",
+			"name": "Update Comment",
+			"url": "http://localhost:8000/api/comments/52/",
+			"time": 18,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Comment updated successfully": true
+			},
+			"testPassFailCounts": {
+				"Comment updated successfully": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				18
+			],
+			"allTests": [
+				{
+					"Comment updated successfully": true
+				}
+			]
+		},
+		{
+			"id": "0cfa127e-b070-45ec-a2ac-f936b38111b2",
+			"name": "Delete Comment",
+			"url": "http://localhost:8000/api/comments/52/",
+			"time": 16,
+			"responseCode": {
+				"code": 204,
+				"name": "No Content"
+			},
+			"tests": {
+				"Comment deleted successfully": true
+			},
+			"testPassFailCounts": {
+				"Comment deleted successfully": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				16
+			],
+			"allTests": [
+				{
+					"Comment deleted successfully": true
+				}
+			]
+		},
+		{
+			"id": "36ad8bdc-d8fe-4a52-82b0-b023ec16084b",
+			"name": "Swagger UI",
+			"url": "http://localhost:8000/swagger/",
+			"time": 10,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				10
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "73b58982-4dc5-49c1-bcf3-c73f5c92bcba",
+			"name": "Swagger JSON",
+			"url": "http://localhost:8000/swagger.json",
+			"time": 20,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				20
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "1e708c13-a609-44c9-a1be-49a4580548f4",
+			"name": "ReDoc UI",
+			"url": "http://localhost:8000/redoc/",
+			"time": 4,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				4
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "1d6d695f-416b-46c8-924c-e9270a9768f6",
 			"name": "Health Check",
 			"url": "http://localhost:8000/health/",
 			"time": 2,
@@ -695,147 +740,603 @@
 			"allTests": [
 				{}
 			]
+		},
+		{
+			"id": "d86404fc-2239-4cca-813c-e818c210fe6a",
+			"name": "Create Admin User",
+			"url": "http://localhost:8000/api/users/",
+			"time": 5,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				5
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0fb515f8-36df-42df-82d0-5c147ab9b53e",
+			"name": "Get Admin User Token",
+			"url": "http://localhost:8000/api/auth/token/",
+			"time": 3,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Admin token not received": false
+			},
+			"testPassFailCounts": {
+				"Admin token not received": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				3
+			],
+			"allTests": [
+				{
+					"Admin token not received": false
+				}
+			]
+		},
+		{
+			"id": "456caec1-b5bb-41eb-b5a1-23749400690d",
+			"name": "Create Regular User",
+			"url": "http://localhost:8000/api/users/",
+			"time": 2,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Regular user already exists": true
+			},
+			"testPassFailCounts": {
+				"Regular user already exists": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				2
+			],
+			"allTests": [
+				{
+					"Regular user already exists": true
+				}
+			]
+		},
+		{
+			"id": "667964f6-309f-4e84-819b-34897a8b1cb6",
+			"name": "Get Regular User Token",
+			"url": "http://localhost:8000/api/auth/token/",
+			"time": 96,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Regular user token not received": false
+			},
+			"testPassFailCounts": {
+				"Regular user token not received": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				96
+			],
+			"allTests": [
+				{
+					"Regular user token not received": false
+				}
+			]
+		},
+		{
+			"id": "bcf3baf9-5c85-47b3-9c85-9125d7c3295b",
+			"name": "Create Guest User",
+			"url": "http://localhost:8000/api/users/",
+			"time": 2,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Guest user already exists": true
+			},
+			"testPassFailCounts": {
+				"Guest user already exists": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				2
+			],
+			"allTests": [
+				{
+					"Guest user already exists": true
+				}
+			]
+		},
+		{
+			"id": "4715ed98-56f2-4c12-addb-5eb4490cb615",
+			"name": "Get Guest User Token",
+			"url": "http://localhost:8000/api/auth/token/",
+			"time": 93,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {
+				"Guest user token not received": false
+			},
+			"testPassFailCounts": {
+				"Guest user token not received": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				93
+			],
+			"allTests": [
+				{
+					"Guest user token not received": false
+				}
+			]
+		},
+		{
+			"id": "4938001d-af69-48b2-b8d2-a017cca9da44",
+			"name": "Set Guest Role",
+			"url": "http://localhost:8000/api/users/3/",
+			"time": 2,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Guest role setting skipped": true
+			},
+			"testPassFailCounts": {
+				"Guest role setting skipped": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				2
+			],
+			"allTests": [
+				{
+					"Guest role setting skipped": true
+				}
+			]
+		},
+		{
+			"id": "51ed6d94-127c-4eb4-b5e1-a61108ca37be",
+			"name": "Create Public Post (Regular User)",
+			"url": "http://localhost:8000/api/posts/",
+			"time": 3,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Public post creation skipped": true
+			},
+			"testPassFailCounts": {
+				"Public post creation skipped": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				3
+			],
+			"allTests": [
+				{
+					"Public post creation skipped": true
+				}
+			]
+		},
+		{
+			"id": "49a29ba9-e52e-4df2-a4e0-ba489f60aa95",
+			"name": "Create Private Post (Regular User)",
+			"url": "http://localhost:8000/api/posts/",
+			"time": 3,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Private post creation skipped": true
+			},
+			"testPassFailCounts": {
+				"Private post creation skipped": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				3
+			],
+			"allTests": [
+				{
+					"Private post creation skipped": true
+				}
+			]
+		},
+		{
+			"id": "16e640c0-8479-4cca-bc29-05ca79f37868",
+			"name": "Get Public Post (Guest User)",
+			"url": "http://localhost:8000/api/posts/53/",
+			"time": 3,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Guest access to public post test skipped": true
+			},
+			"testPassFailCounts": {
+				"Guest access to public post test skipped": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				3
+			],
+			"allTests": [
+				{
+					"Guest access to public post test skipped": true
+				}
+			]
+		},
+		{
+			"id": "f853a5c6-1b3a-453e-8202-0beb31bdb3ff",
+			"name": "Get Private Post (Guest User) - Should Fail",
+			"url": "http://localhost:8000/api/posts/53/",
+			"time": 4,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Guest access denial test skipped": true
+			},
+			"testPassFailCounts": {
+				"Guest access denial test skipped": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				4
+			],
+			"allTests": [
+				{
+					"Guest access denial test skipped": true
+				}
+			]
+		},
+		{
+			"id": "b7856132-feb1-4ff8-a391-f1a436ff5bf1",
+			"name": "Get Private Post (Admin User)",
+			"url": "http://localhost:8000/api/posts/53/",
+			"time": 3,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Admin access to private post failed unexpectedly": false
+			},
+			"testPassFailCounts": {
+				"Admin access to private post failed unexpectedly": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				3
+			],
+			"allTests": [
+				{
+					"Admin access to private post failed unexpectedly": false
+				}
+			]
+		},
+		{
+			"id": "b510e3a4-c29a-4ec2-ab15-ceb1cfeeb1fc",
+			"name": "Delete Post (Guest User) - Should Fail",
+			"url": "http://localhost:8000/api/posts/53/",
+			"time": 3,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Guest deletion denial test skipped": true
+			},
+			"testPassFailCounts": {
+				"Guest deletion denial test skipped": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				3
+			],
+			"allTests": [
+				{
+					"Guest deletion denial test skipped": true
+				}
+			]
+		},
+		{
+			"id": "d2c4fbad-3746-45ad-a775-25ce128a5ca2",
+			"name": "Feed - Filter by Privacy (Admin)",
+			"url": "http://localhost:8000/api/feed/?privacy=private",
+			"time": 3,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Privacy filter test skipped": true
+			},
+			"testPassFailCounts": {
+				"Privacy filter test skipped": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				3
+			],
+			"allTests": [
+				{
+					"Privacy filter test skipped": true
+				}
+			]
+		},
+		{
+			"id": "72793d90-db1f-42a0-81f9-beb4d13fd35e",
+			"name": "Delete Post (Admin User)",
+			"url": "http://localhost:8000/api/posts/53/",
+			"time": 2,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {
+				"Admin deletion test skipped": true
+			},
+			"testPassFailCounts": {
+				"Admin deletion test skipped": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				2
+			],
+			"allTests": [
+				{
+					"Admin deletion test skipped": true
+				}
+			]
 		}
 	],
 	"count": 1,
-	"totalTime": 518,
+	"totalTime": 823,
 	"collection": {
 		"requests": [
 			{
-				"id": "ddf33b12-f948-42e9-aa62-155d0498728d",
+				"id": "32a9fbad-de1a-42a9-9761-b2424243c321",
 				"method": "POST"
 			},
 			{
-				"id": "b0f56f3c-eabc-4988-86d4-d8652e12f148",
+				"id": "d8748e78-1153-4f2d-a493-f8092c07b515",
 				"method": "GET"
 			},
 			{
-				"id": "68d8e935-7465-4973-83cb-0d0142f703db",
+				"id": "5ba7ed85-f288-4f7a-bf0f-c1b00182cf8d",
 				"method": "GET"
 			},
 			{
-				"id": "e48f4a73-02c0-4888-aa0d-fac49428eec5",
+				"id": "648638bb-69f2-48a2-b477-c3ac886df4d9",
 				"method": "GET"
 			},
 			{
-				"id": "be881209-7f13-4da5-be23-23da85e7dfcc",
+				"id": "474b11a1-9311-4353-92b3-4dfdd6a8964e",
 				"method": "POST"
 			},
 			{
-				"id": "d93b8d3d-f969-430e-b785-d5403b232c82",
+				"id": "0e0d6c9a-26c9-4f8f-9569-dd0443812099",
 				"method": "GET"
 			},
 			{
-				"id": "965ab3c1-dfd0-430f-9ea6-61750cfcb959",
+				"id": "2ae26b2a-5a58-4844-9f7c-8c9eb9ab0948",
 				"method": "PATCH"
 			},
 			{
-				"id": "ff247742-0473-4210-8515-6339ea2a09b3",
+				"id": "02ab16da-4ccd-44e3-abce-394dae3bf999",
 				"method": "DELETE"
 			},
 			{
-				"id": "11172a31-9f78-4afa-a34b-fc5fdb3322e8",
+				"id": "9522b5f1-128d-4725-828c-7cbd4f952666",
 				"method": "GET"
 			},
 			{
-				"id": "4fd199f3-f5fa-450e-95c7-0a38be8db0a7",
+				"id": "7df05063-c9da-494c-bd5a-14ba71efdd2d",
 				"method": "POST"
 			},
 			{
-				"id": "3beb5cd2-cfcb-4c7a-a5b9-48b3d09f410d",
+				"id": "2833c5b9-ff5f-44dd-bd00-326f09f4671c",
 				"method": "POST"
 			},
 			{
-				"id": "59176ed4-fcd2-4c77-b7a2-9c4fc2e0e720",
+				"id": "04e5520c-e60d-45d9-a958-fa73e67e1b74",
 				"method": "POST"
 			},
 			{
-				"id": "f1436137-a118-4b38-843a-e6a93e42dc2a",
+				"id": "78375c3f-98e6-4ca6-bdb4-6f58d9daa5ae",
 				"method": "POST"
 			},
 			{
-				"id": "f6c80975-05d1-42b0-9f5c-c1da4a328312",
+				"id": "1e9dbbfa-44f6-47c1-984c-708c19dab15d",
 				"method": "GET"
 			},
 			{
-				"id": "a2dccfb0-c092-4711-b369-d686d3d71772",
+				"id": "f4e764e6-8899-4b2b-9422-16fdc137e1f2",
+				"method": "POST"
+			},
+			{
+				"id": "479fb18b-2280-453d-8402-346b13b3f3f1",
+				"method": "DELETE"
+			},
+			{
+				"id": "94da4e31-dbd6-4471-9eee-86345cbf4b9a",
+				"method": "GET"
+			},
+			{
+				"id": "0609e197-6e80-4d57-9d9b-6156853e52e6",
+				"method": "GET"
+			},
+			{
+				"id": "e2ee9120-1bdf-43b7-84b3-aa91eacd5653",
+				"method": "GET"
+			},
+			{
+				"id": "b3225ff2-82b4-4eb1-b2a4-b10bdbcb3e22",
+				"method": "GET"
+			},
+			{
+				"id": "ae01f8f6-d188-4544-8269-946c9d00f9c9",
+				"method": "GET"
+			},
+			{
+				"id": "4516b34e-b0aa-462b-9246-ec9868eec06b",
 				"method": "PATCH"
 			},
 			{
-				"id": "5cd0c4c5-33f6-419d-bb10-16c25feb8f8b",
+				"id": "8548f206-018d-4b18-947c-1d786d42e767",
 				"method": "DELETE"
 			},
 			{
-				"id": "1e03cee8-4ba4-490b-996d-b1cb054f851b",
+				"id": "082c998f-9b51-4f99-a0c5-2955d7a470e4",
+				"method": "GET"
+			},
+			{
+				"id": "b6032975-80f5-4f03-9377-c1d8f5427d75",
 				"method": "POST"
 			},
 			{
-				"id": "040b8cff-33e1-4529-87ec-0d4b34edecd7",
+				"id": "59ba536c-7328-4d0c-918e-7bc3d7766acd",
+				"method": "GET"
+			},
+			{
+				"id": "121fb95a-28ce-47dd-934b-6977cb19d391",
+				"method": "POST"
+			},
+			{
+				"id": "23a8406d-6da7-4a3b-9297-9bf5c04e4915",
+				"method": "GET"
+			},
+			{
+				"id": "44aab905-c9c7-4a7b-bc3f-76cf9cebf1ac",
+				"method": "PUT"
+			},
+			{
+				"id": "0cfa127e-b070-45ec-a2ac-f936b38111b2",
 				"method": "DELETE"
 			},
 			{
-				"id": "83211f14-d8be-4a78-93a0-8e96d46a7f83",
+				"id": "36ad8bdc-d8fe-4a52-82b0-b023ec16084b",
 				"method": "GET"
 			},
 			{
-				"id": "3326738f-bbbf-4bbe-b20b-c645f9a24e26",
+				"id": "73b58982-4dc5-49c1-bcf3-c73f5c92bcba",
 				"method": "GET"
 			},
 			{
-				"id": "d697a644-eb4e-4a76-80b7-0212080f487d",
+				"id": "1e708c13-a609-44c9-a1be-49a4580548f4",
 				"method": "GET"
 			},
 			{
-				"id": "fe5a9aac-699f-45e7-8569-f83a7ed2ca9c",
+				"id": "1d6d695f-416b-46c8-924c-e9270a9768f6",
 				"method": "GET"
 			},
 			{
-				"id": "36611241-185c-486f-96f4-2df9e7c6c6a8",
-				"method": "GET"
-			},
-			{
-				"id": "e0d459cb-0c26-4561-a957-e87578990266",
-				"method": "GET"
-			},
-			{
-				"id": "258d3887-85d4-4b91-97eb-390736768f97",
+				"id": "d86404fc-2239-4cca-813c-e818c210fe6a",
 				"method": "POST"
 			},
 			{
-				"id": "c9c8f252-2199-428f-8eea-9c421f107c91",
-				"method": "GET"
+				"id": "0fb515f8-36df-42df-82d0-5c147ab9b53e",
+				"method": "POST"
 			},
 			{
-				"id": "72f1cb4b-6a91-4861-a1c6-737c196bed53",
+				"id": "456caec1-b5bb-41eb-b5a1-23749400690d",
+				"method": "POST"
+			},
+			{
+				"id": "667964f6-309f-4e84-819b-34897a8b1cb6",
+				"method": "POST"
+			},
+			{
+				"id": "bcf3baf9-5c85-47b3-9c85-9125d7c3295b",
+				"method": "POST"
+			},
+			{
+				"id": "4715ed98-56f2-4c12-addb-5eb4490cb615",
+				"method": "POST"
+			},
+			{
+				"id": "4938001d-af69-48b2-b8d2-a017cca9da44",
 				"method": "PATCH"
 			},
 			{
-				"id": "687b3892-995b-4a96-b3af-c79864d37ce7",
-				"method": "DELETE"
-			},
-			{
-				"id": "0c09e0af-34b9-4a80-96b3-3aeef5f9dfe6",
-				"method": "GET"
-			},
-			{
-				"id": "01606c2f-6b8d-4323-aaaa-e82d9430662a",
+				"id": "51ed6d94-127c-4eb4-b5e1-a61108ca37be",
 				"method": "POST"
 			},
 			{
-				"id": "f21d2aca-f27a-4359-9b12-7d606e1c9bd1",
+				"id": "49a29ba9-e52e-4df2-a4e0-ba489f60aa95",
+				"method": "POST"
+			},
+			{
+				"id": "16e640c0-8479-4cca-bc29-05ca79f37868",
 				"method": "GET"
 			},
 			{
-				"id": "214339d6-ca1a-4fdc-bbeb-c5bd8e9e14c7",
+				"id": "f853a5c6-1b3a-453e-8202-0beb31bdb3ff",
 				"method": "GET"
 			},
 			{
-				"id": "4c5dcfa8-47c4-4ee4-babd-c4b8c05ddd48",
+				"id": "b7856132-feb1-4ff8-a391-f1a436ff5bf1",
 				"method": "GET"
 			},
 			{
-				"id": "63d4b1fd-9b92-4cf9-84b4-43c64053049a",
+				"id": "b510e3a4-c29a-4ec2-ab15-ceb1cfeeb1fc",
+				"method": "DELETE"
+			},
+			{
+				"id": "d2c4fbad-3746-45ad-a775-25ce128a5ca2",
 				"method": "GET"
+			},
+			{
+				"id": "72793d90-db1f-42a0-81f9-beb4d13fd35e",
+				"method": "DELETE"
 			}
 		]
 	}
