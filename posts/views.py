@@ -224,6 +224,13 @@ class CommentPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+
+class NewsFeedPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class PostViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing posts.
@@ -500,6 +507,189 @@ class PostViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error adding comment: {str(e)}")
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Get personalized news feed",
+        responses={
+            200: PostSerializer(many=True)
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                'page',
+                openapi.IN_QUERY,
+                description="Page number",
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'page_size',
+                openapi.IN_QUERY,
+                description="Number of items per page",
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'filter',
+                openapi.IN_QUERY,
+                description="Filter type (all, liked, own, followed)",
+                type=openapi.TYPE_STRING,
+                default='all'
+            ),
+            openapi.Parameter(
+                'post_type',
+                openapi.IN_QUERY,
+                description="Filter by post type (text, image, video, link)",
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'metadata_key',
+                openapi.IN_QUERY,
+                description="Filter by specific metadata key (e.g., 'file_size', 'dimensions', 'duration', 'url')",
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'metadata_value',
+                openapi.IN_QUERY,
+                description="Filter by metadata value (used with metadata_key)",
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'metadata_min',
+                openapi.IN_QUERY,
+                description="Filter by minimum metadata value (used with metadata_key for range filtering)",
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'metadata_max',
+                openapi.IN_QUERY,
+                description="Filter by maximum metadata value (used with metadata_key for range filtering)",
+                type=openapi.TYPE_STRING
+            )
+        ]
+    )
+    @action(detail=False, methods=['get'])
+    def feed(self, request):
+        """
+        Get a personalized news feed with advanced filtering options.
+        
+        This endpoint supports:
+        1. Basic filtering: all, liked, own posts
+        2. Post type filtering: text, image, video, link
+        3. Metadata filtering:
+            - Exact match: Use metadata_key and metadata_value
+            - Range filtering: Use metadata_key with metadata_min and/or metadata_max
+        
+        Examples:
+        - Get posts with file_size=1024: ?metadata_key=file_size&metadata_value=1024
+        - Get posts with file_size >= 1000: ?metadata_key=file_size&metadata_min=1000
+        - Get posts with duration <= 120: ?metadata_key=duration&metadata_max=120
+        - Get posts with 100 <= file_size <= 5000: ?metadata_key=file_size&metadata_min=100&metadata_max=5000
+        """
+        try:
+            user = request.user
+            filter_type = request.query_params.get('filter', 'all')
+            post_type = request.query_params.get('post_type', None)
+            metadata_key = request.query_params.get('metadata_key', None)
+            metadata_value = request.query_params.get('metadata_value', None)
+            metadata_min = request.query_params.get('metadata_min', None)
+            metadata_max = request.query_params.get('metadata_max', None)
+            
+            # Base queryset - ordered by created_at in descending order (newest first)
+            queryset = Post.objects.select_related('author').prefetch_related('likes', 'comments').order_by('-created_at')
+            
+            # Apply filtering based on request parameters
+            if filter_type == 'liked':
+                # Posts liked by the current user
+                queryset = queryset.filter(likes__user=user)
+            elif filter_type == 'own':
+                # Posts created by the current user
+                queryset = queryset.filter(author=user)
+            # Note: 'followed' filter would be implemented if there was a 'Follow' model
+            # elif filter_type == 'followed':
+            #     # Posts from users that the current user follows
+            #     followed_users = user.following.values_list('followed_user_id', flat=True)
+            #     queryset = queryset.filter(author_id__in=followed_users)
+            
+            # Filter by post type if specified
+            if post_type:
+                queryset = queryset.filter(post_type=post_type)
+            
+            # Filter by metadata if key and value are provided
+            if metadata_key:
+                if metadata_value:
+                    # We need a different approach - the metadata is stored as JSON text in the database
+                    # Let's use a simple LIKE query to search for the value in the JSON text
+                    search_string = f'"{metadata_key}": {metadata_value}'
+                    # If the value is a string, we need to add quotes
+                    if not metadata_value.isdigit():
+                        search_string = f'"{metadata_key}": "{metadata_value}"'
+                    
+                    # Get all posts with this key first
+                    key_posts = queryset.filter(_metadata__contains=f'"{metadata_key}":')
+                    
+                    # Then filter them manually to ensure exact match
+                    filtered_ids = []
+                    for post in key_posts:
+                        metadata_dict = post.metadata
+                        if metadata_dict and metadata_key in metadata_dict:
+                            # For numeric values, compare as numbers
+                            if metadata_value.isdigit():
+                                if str(metadata_dict[metadata_key]) == metadata_value:
+                                    filtered_ids.append(post.id)
+                            # For string values, compare as strings
+                            else:
+                                if metadata_dict[metadata_key] == metadata_value:
+                                    filtered_ids.append(post.id)
+                    
+                    queryset = queryset.filter(id__in=filtered_ids)
+                elif metadata_min or metadata_max:
+                    # For range filtering, we'll need to first get all posts with the metadata key
+                    key_posts = queryset.filter(_metadata__contains=f'"{metadata_key}":')
+                    
+                    if metadata_min:
+                        try:
+                            # Convert to numeric value
+                            min_value = float(metadata_min)
+                            # Then filter posts manually
+                            filtered_ids = []
+                            for post in key_posts:
+                                try:
+                                    if post.metadata.get(metadata_key, 0) >= min_value:
+                                        filtered_ids.append(post.id)
+                                except (ValueError, TypeError):
+                                    pass
+                            queryset = queryset.filter(id__in=filtered_ids)
+                        except ValueError:
+                            # If conversion fails, return empty queryset
+                            queryset = queryset.none()
+                    
+                    if metadata_max:
+                        try:
+                            # Convert to numeric value
+                            max_value = float(metadata_max)
+                            # Then filter posts manually
+                            filtered_ids = []
+                            for post in key_posts:
+                                try:
+                                    if post.metadata.get(metadata_key, float('inf')) <= max_value:
+                                        filtered_ids.append(post.id)
+                                except (ValueError, TypeError):
+                                    pass
+                            queryset = queryset.filter(id__in=filtered_ids)
+                        except ValueError:
+                            # If conversion fails, return empty queryset
+                            queryset = queryset.none()
+            
+            # Paginate results
+            paginator = NewsFeedPagination()
+            paginated_posts = paginator.paginate_queryset(queryset, request)
+            serializer = self.get_serializer(paginated_posts, many=True)
+            
+            logger.info(f"User {user.id} retrieved news feed with filter: {filter_type}")
+            return paginator.get_paginated_response(serializer.data)
+        
+        except Exception as e:
+            logger.error(f"Error retrieving news feed: {str(e)}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 

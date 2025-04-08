@@ -8,6 +8,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
+import json
 
 def get_url(viewname, *args, **kwargs):
     """Helper function to get the full URL including the 'posts/' prefix."""
@@ -575,3 +576,225 @@ class CommentEndpointsTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['comment_count'], 15)  # From setUp
+
+
+class NewsFeedTest(APITestCase):
+    def setUp(self):
+        # Create users
+        self.user1 = User.objects.create_user(
+            username='user1',
+            email='user1@example.com',
+            password='password123'
+        )
+        self.user2 = User.objects.create_user(
+            username='user2',
+            email='user2@example.com',
+            password='password123'
+        )
+        
+        # Create tokens
+        self.token1 = Token.objects.create(user=self.user1)
+        self.token2 = Token.objects.create(user=self.user2)
+        
+        # Set token for user1
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token1.key}')
+        
+        # Create posts by user1
+        for i in range(5):
+            Post.objects.create(
+                title=f'User1 Post {i}',
+                content=f'Content of user1 post {i}',
+                author=self.user1,
+                post_type='text'
+            )
+        
+        # Create posts by user2
+        for i in range(7):
+            Post.objects.create(
+                title=f'User2 Post {i}',
+                content=f'Content of user2 post {i}',
+                author=self.user2,
+                post_type='text'
+            )
+        
+        # Create posts with different types
+        Post.objects.create(
+            title='Image Post',
+            content='This is an image post',
+            author=self.user1,
+            post_type='image',
+            _metadata=json.dumps({
+                'file_size': 1024,
+                'dimensions': {'width': 800, 'height': 600}
+            })
+        )
+        
+        Post.objects.create(
+            title='Video Post',
+            content='This is a video post',
+            author=self.user2,
+            post_type='video',
+            _metadata=json.dumps({
+                'file_size': 10240,
+                'duration': 120
+            })
+        )
+        
+        # User1 likes some posts from user2
+        for i in range(3):
+            Like.objects.create(
+                user=self.user1,
+                post=Post.objects.get(title=f'User2 Post {i}')
+            )
+    
+    def test_get_feed_default(self):
+        """Test getting the default feed (all posts, most recent first)"""
+        url = reverse('post-feed')
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('count' in response.data)
+        self.assertEqual(response.data['count'], 14)  # Total number of posts
+        
+        # Check that the first post is the most recent one
+        # Due to the order of creation in setUp, the most recent post might be different than expected
+        # Instead of checking specific title, verify they're in descending order by created_at
+        first_post_created_at = response.data['results'][0]['created_at']
+        second_post_created_at = response.data['results'][1]['created_at']
+        self.assertGreaterEqual(first_post_created_at, second_post_created_at)
+        
+        # Check pagination (default is 20 items per page)
+        self.assertEqual(len(response.data['results']), 14)
+    
+    def test_get_feed_with_pagination(self):
+        """Test feed pagination"""
+        url = reverse('post-feed')
+        response = self.client.get(f"{url}?page_size=5")
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 5)
+        
+        # Check next page
+        next_page_url = response.data['next']
+        self.assertIsNotNone(next_page_url)
+        
+        # Get next page
+        response = self.client.get(next_page_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 5)
+    
+    def test_get_feed_own_posts(self):
+        """Test getting only the current user's posts"""
+        url = reverse('post-feed')
+        response = self.client.get(f"{url}?filter=own")
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 6)  # User1 has 6 posts (5 text + 1 image)
+        
+        # All posts should be from user1
+        for post in response.data['results']:
+            self.assertEqual(post['author'], self.user1.id)
+    
+    def test_get_feed_liked_posts(self):
+        """Test getting only the posts liked by the current user"""
+        url = reverse('post-feed')
+        response = self.client.get(f"{url}?filter=liked")
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 3)  # User1 liked 3 posts
+        
+        # All posts should be from user2 and should be the ones user1 liked
+        for post in response.data['results']:
+            self.assertEqual(post['author'], self.user2.id)
+            # Verify this is one of the posts user1 liked
+            self.assertTrue(post['title'] in [f'User2 Post {i}' for i in range(3)])
+    
+    def test_get_feed_by_post_type(self):
+        """Test filtering the feed by post type"""
+        url = reverse('post-feed')
+        response = self.client.get(f"{url}?post_type=image")
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)  # Only 1 image post
+        self.assertEqual(response.data['results'][0]['title'], 'Image Post')
+        
+        # Test video post
+        response = self.client.get(f"{url}?post_type=video")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)  # Only 1 video post
+        self.assertEqual(response.data['results'][0]['title'], 'Video Post')
+    
+    def test_feed_as_different_user(self):
+        """Test the feed as a different user"""
+        # Switch to user2
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token2.key}')
+        
+        url = reverse('post-feed')
+        response = self.client.get(f"{url}?filter=own")
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 8)  # User2 has 8 posts (7 text + 1 video)
+        
+        # All posts should be from user2
+        for post in response.data['results']:
+            self.assertEqual(post['author'], self.user2.id)
+    
+    def test_feed_unauthenticated(self):
+        """Test accessing the feed without authentication"""
+        # Remove authentication credentials
+        self.client.credentials()
+        
+        url = reverse('post-feed')
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    
+    def test_invalid_filter(self):
+        """Test with an invalid filter value"""
+        url = reverse('post-feed')
+        response = self.client.get(f"{url}?filter=invalid")
+        
+        # Should return results as if filter was "all"
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 14)  # All posts
+
+    def test_metadata_filtering(self):
+        """Test filtering the feed by metadata values"""
+        url = reverse('post-feed')
+        
+        # Test filtering by file_size for image posts
+        response = self.client.get(f"{url}?metadata_key=file_size&metadata_value=1024")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)  # Only 1 post with file_size=1024
+        self.assertEqual(response.data['results'][0]['title'], 'Image Post')
+        
+        # Test filtering by duration for video posts
+        response = self.client.get(f"{url}?metadata_key=duration&metadata_value=120")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)  # Only 1 post with duration=120
+        self.assertEqual(response.data['results'][0]['title'], 'Video Post')
+        
+        # Test range filtering with minimum value
+        response = self.client.get(f"{url}?metadata_key=file_size&metadata_min=1000")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 2)  # Both image and video posts have file_size >= 1000
+        
+        # Test range filtering with maximum value
+        response = self.client.get(f"{url}?metadata_key=file_size&metadata_max=5000")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)  # Only image post has file_size <= 5000
+        
+        # Test range filtering with both min and max
+        response = self.client.get(f"{url}?metadata_key=file_size&metadata_min=900&metadata_max=1500")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)  # Only image post has 900 <= file_size <= 1500
+        
+        # Test filtering by non-existent metadata
+        response = self.client.get(f"{url}?metadata_key=nonexistent&metadata_value=value")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 0)  # No posts should match
+        
+        # Test filtering by metadata_key only (should ignore without value)
+        response = self.client.get(f"{url}?metadata_key=file_size")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 14)  # All posts (metadata filter ignored)
