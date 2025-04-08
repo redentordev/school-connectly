@@ -490,7 +490,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def comment(self, request, pk=None):
         try:
             post = self.get_object()
-            serializer = CommentSerializer(data={'text': request.data.get('text'), 'post': post.id})
+            serializer = CommentSerializer(data={'text': request.data.get('text'), 'post': post.id}, context={'request': request})
             
             if serializer.is_valid():
                 serializer.save(author=request.user, post=post)

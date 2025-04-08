@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Post, Comment
+from .models import Post, Comment, Like
 from factories.post_factory import PostFactory
 from singletons.config_manager import ConfigManager
 from singletons.logger_singleton import LoggerSingleton
@@ -430,3 +430,148 @@ class CommentAPITest(APITestCase):
         # Try to delete the comment
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class LikeAPITest(APITestCase):
+    def setUp(self):
+        # Create a user
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.token = Token.objects.create(user=self.user)
+        
+        # Create another user
+        self.other_user = User.objects.create_user(
+            username='otheruser',
+            email='other@example.com',
+            password='otherpass123'
+        )
+        self.other_token = Token.objects.create(user=self.other_user)
+        
+        # Create a post
+        self.post = Post.objects.create(
+            title='Test Post',
+            content='This is a test post',
+            author=self.user,
+            post_type='text'
+        )
+        
+        # Set up authentication
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+
+    def test_like_post(self):
+        """Test liking a post"""
+        url = reverse('post-like', kwargs={'pk': self.post.pk})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Like.objects.filter(user=self.user, post=self.post).count(), 1)
+        self.assertEqual(response.data['status'], 'post liked')
+
+    def test_like_post_twice(self):
+        """Test liking a post twice should return 409 Conflict"""
+        # First like
+        url = reverse('post-like', kwargs={'pk': self.post.pk})
+        self.client.post(url)
+        
+        # Second like
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        self.assertEqual(Like.objects.filter(user=self.user, post=self.post).count(), 1)
+        self.assertEqual(response.data['status'], 'already liked')
+
+    def test_unlike_post(self):
+        """Test unliking a post"""
+        # First like the post
+        Like.objects.create(user=self.user, post=self.post)
+        
+        # Then unlike it
+        url = reverse('post-unlike', kwargs={'pk': self.post.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Like.objects.filter(user=self.user, post=self.post).count(), 0)
+
+    def test_unlike_not_liked_post(self):
+        """Test unliking a post that wasn't liked should return 404"""
+        url = reverse('post-unlike', kwargs={'pk': self.post.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_post_with_like_count(self):
+        """Test that post details include like count"""
+        # Create likes from multiple users
+        Like.objects.create(user=self.user, post=self.post)
+        Like.objects.create(user=self.other_user, post=self.post)
+        
+        url = reverse('post-detail', kwargs={'pk': self.post.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['like_count'], 2)
+
+
+class CommentEndpointsTest(APITestCase):
+    def setUp(self):
+        # Create a user
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.token = Token.objects.create(user=self.user)
+        
+        # Create a post
+        self.post = Post.objects.create(
+            title='Test Post',
+            content='This is a test post',
+            author=self.user,
+            post_type='text'
+        )
+        
+        # Create some comments
+        for i in range(15):  # Create 15 comments to test pagination
+            Comment.objects.create(
+                text=f'Test comment {i}',
+                author=self.user,
+                post=self.post
+            )
+        
+        # Set up authentication
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+
+    def test_get_post_comments(self):
+        """Test retrieving comments for a post with pagination"""
+        url = reverse('post-comments', kwargs={'pk': self.post.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Check pagination
+        self.assertIn('count', response.data)
+        self.assertEqual(response.data['count'], 15)  # Total number of comments
+        
+        # By default, should return 10 comments (default page size)
+        self.assertEqual(len(response.data['results']), 10)
+        
+        # Check second page
+        url = f"{url}?page=2"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 5)  # 5 remaining comments
+
+    def test_add_comment_to_post(self):
+        """Test adding a comment to a post"""
+        url = reverse('post-comment', kwargs={'pk': self.post.pk})
+        data = {'text': 'This is a new comment'}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        # Verify comment was created
+        self.assertEqual(Comment.objects.count(), 16)  # 15 existing + 1 new
+        self.assertEqual(Comment.objects.latest('created_at').text, 'This is a new comment')
+
+    def test_post_with_comment_count(self):
+        """Test that post details include comment count"""
+        url = reverse('post-detail', kwargs={'pk': self.post.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['comment_count'], 15)  # From setUp
