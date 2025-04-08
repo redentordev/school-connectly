@@ -54,6 +54,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Get base path
+            const basePath = '/api/auth/demo/';
+            
             // For debugging - log the full URL
             console.log("Full URL:", window.location.href);
             
@@ -79,13 +82,13 @@
                     document.getElementById('debug').style.display = 'block';
                     // Redirect with error
                     setTimeout(function() {
-                        window.location.href = '/api/auth/demo/?error=' + encodeURIComponent(error);
+                        window.location.href = basePath + '?error=' + encodeURIComponent(error);
                     }, 3000); // delay to allow reading debug info
                 } 
                 // Check for token
                 else if (accessToken) {
                     // Redirect with token
-                    window.location.href = '/api/auth/demo/?token=' + encodeURIComponent(accessToken);
+                    window.location.href = basePath + '?token=' + encodeURIComponent(accessToken);
                 } 
                 // No token or error, but hash exists
                 else {
@@ -93,7 +96,7 @@
                     document.getElementById('debug').style.display = 'block';
                     // Redirect with generic error
                     setTimeout(function() {
-                        window.location.href = '/api/auth/demo/?error=No_access_token_received';
+                        window.location.href = basePath + '?error=No_access_token_received';
                     }, 3000); // delay to allow reading debug info
                 }
             } 
@@ -103,7 +106,7 @@
                 document.getElementById('debug').style.display = 'block';
                 // Redirect with error
                 setTimeout(function() {
-                    window.location.href = '/api/auth/demo/?error=No_response_data_received';
+                    window.location.href = basePath + '?error=No_response_data_received';
                 }, 3000); // delay to allow reading debug info
             }
         });

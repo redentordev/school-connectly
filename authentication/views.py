@@ -22,7 +22,11 @@ def oauth_demo(request):
     # Use the exact values from the Google credentials JSON
     auth_uri = "https://accounts.google.com/o/oauth2/auth"  # From the JSON
     client_id = "135591834469-2eh68nfpmuj5afhfqoi20fk816nmr04r.apps.googleusercontent.com"  # From the JSON
-    redirect_uri = "http://localhost:8000/api/auth/callback/"  # From the JSON
+    
+    # Get the current hostname for the redirect_uri
+    host = request.get_host()
+    protocol = 'https' if request.is_secure() else 'http'
+    redirect_uri = f"{protocol}://{host}/api/auth/callback/"
     
     # Print for debugging
     print(f"Auth URI: {auth_uri}")
@@ -42,7 +46,8 @@ def oauth_demo(request):
     oauth_url = f"{auth_uri}?{urllib.parse.urlencode(params)}"
     
     context = {
-        'oauth_url': oauth_url
+        'oauth_url': oauth_url,
+        'redirect_uri': redirect_uri
     }
     return render(request, 'authentication/demo.html', context)
 

@@ -102,7 +102,7 @@
             <h3>Debug Information</h3>
             <p><strong>OAuth URL:</strong> <span id="oauth-url">{{ oauth_url }}</span></p>
             <p>If you get a "redirect_uri_mismatch" error, make sure the redirect URI in your Google Cloud Console matches exactly:</p>
-            <pre>http://localhost:8000/api/auth/callback/</pre>
+            <pre>{{ redirect_uri }}</pre>
         </div>
 
         <a href="{{ oauth_url }}" class="google-btn">Login with Google</a>
@@ -122,6 +122,11 @@
     </div>
 
     <script>
+        // Get current host
+        const currentHost = window.location.host;
+        const isProduction = currentHost === 'connectly.redentor.dev';
+        const apiBasePath = '/api/auth';
+        
         // Function to get query parameters from URL
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -139,7 +144,7 @@
                 document.getElementById('api-response').textContent = 'Processing token: ' + token.substring(0, 10) + '...';
                 
                 // Send token to backend
-                fetch('/api/auth/google/', {
+                fetch(`${apiBasePath}/google/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
