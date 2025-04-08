@@ -154,6 +154,18 @@ os.makedirs(STATIC_ROOT, exist_ok=True)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Cache settings
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'django_cache'),
+        'TIMEOUT': 300,  # 5 minutes default cache timeout
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
+    }
+}
+
 # Security Settings
 SECURE_SSL_REDIRECT = bool(int(os.getenv('SECURE_SSL_REDIRECT', '1')))
 SESSION_COOKIE_SECURE = bool(int(os.getenv('SESSION_COOKIE_SECURE', '1')))
