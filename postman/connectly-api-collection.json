@@ -1,0 +1,986 @@
+{
+  "info": {
+    "name": "Connectly API Collection",
+    "description": "A comprehensive collection for testing the Connectly API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints for user authentication",
+      "item": [
+        {
+          "name": "Get Auth Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.token) {",
+                  "    pm.environment.set('authToken', jsonData.token);",
+                  "    console.log('Auth token saved:', jsonData.token);",
+                  "    pm.test(\"Auth token received\", function() {",
+                  "        pm.expect(jsonData.token).to.be.a('string');",
+                  "    });",
+                  "} else {",
+                  "    console.log('Failed to get auth token');",
+                  "    pm.test(\"Auth token not received\", function() {",
+                  "        pm.expect.fail('No token received in response');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/token/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "token", ""]
+            },
+            "description": "Get authentication token for subsequent API calls"
+          }
+        },
+        {
+          "name": "Google OAuth Login",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/google/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "google", ""]
+            },
+            "description": "Initiate Google OAuth login flow"
+          }
+        },
+        {
+          "name": "OAuth Demo Page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/demo/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "demo", ""]
+            },
+            "description": "View OAuth demo page"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Endpoints for user management",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", ""]
+            },
+            "description": "List all users (admin only)"
+          }
+        },
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('testUserId', jsonData.id);",
+                  "    console.log('User created with ID:', jsonData.id);",
+                  "    pm.test(\"User created successfully\", function() {",
+                  "        pm.expect(jsonData.id).to.be.a('number');",
+                  "    });",
+                  "} else {",
+                  "    console.log('Failed to create user');",
+                  "    pm.test(\"User not created\", function() {",
+                  "        pm.expect.fail('No user ID received in response');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser{{$timestamp}}\",\n    \"email\": \"testuser{{$timestamp}}@example.com\",\n    \"password\": \"securepassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", ""]
+            },
+            "description": "Create a new user (admin only)"
+          }
+        },
+        {
+          "name": "Get User Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{testUserId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{testUserId}}", ""]
+            },
+            "description": "Get details for a specific user (admin only)"
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"updated{{$timestamp}}@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{testUserId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{testUserId}}", ""]
+            },
+            "description": "Update user details (admin only)"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{testUserId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "{{testUserId}}", ""]
+            },
+            "description": "Delete a user (admin only)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "description": "Endpoints for post management",
+      "item": [
+        {
+          "name": "List Posts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/?page=1&page_size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "List all posts with pagination"
+          }
+        },
+        {
+          "name": "Create Text Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('testPostId', jsonData.id);",
+                  "    console.log('Post created with ID:', jsonData.id);",
+                  "    pm.test(\"Post created successfully\", function() {",
+                  "        pm.expect(jsonData.id).to.be.a('number');",
+                  "    });",
+                  "} else {",
+                  "    console.log('Failed to create post');",
+                  "    pm.test(\"Post not created\", function() {",
+                  "        pm.expect.fail('No post ID received in response');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Test Text Post\",\n    \"content\": \"This is a test text post created at {{$timestamp}}\",\n    \"post_type\": \"text\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ""]
+            },
+            "description": "Create a new text post"
+          }
+        },
+        {
+          "name": "Create Image Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('testImagePostId', jsonData.id);",
+                  "    console.log('Image post created with ID:', jsonData.id);",
+                  "    pm.test(\"Image post created successfully\", function() {",
+                  "        pm.expect(jsonData.id).to.be.a('number');",
+                  "        pm.expect(jsonData.post_type).to.equal('image');",
+                  "    });",
+                  "} else {",
+                  "    console.log('Failed to create image post');",
+                  "    pm.test(\"Image post not created\", function() {",
+                  "        pm.expect.fail('No post ID received in response');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Test Image Post\",\n    \"content\": \"This is a test image post\",\n    \"post_type\": \"image\",\n    \"metadata\": {\n        \"file_size\": 1024,\n        \"dimensions\": {\"width\": 800, \"height\": 600}\n    }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ""]
+            },
+            "description": "Create a new image post with metadata"
+          }
+        },
+        {
+          "name": "Create Video Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('testVideoPostId', jsonData.id);",
+                  "    console.log('Video post created with ID:', jsonData.id);",
+                  "    pm.test(\"Video post created successfully\", function() {",
+                  "        pm.expect(jsonData.id).to.be.a('number');",
+                  "        pm.expect(jsonData.post_type).to.equal('video');",
+                  "    });",
+                  "} else {",
+                  "    console.log('Failed to create video post');",
+                  "    pm.test(\"Video post not created\", function() {",
+                  "        pm.expect.fail('No post ID received in response');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Test Video Post\",\n    \"content\": \"This is a test video post\",\n    \"post_type\": \"video\",\n    \"metadata\": {\n        \"file_size\": 5120,\n        \"duration\": 180,\n        \"dimensions\": {\"width\": 1280, \"height\": 720}\n    }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ""]
+            },
+            "description": "Create a new video post with metadata"
+          }
+        },
+        {
+          "name": "Create Link Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('testLinkPostId', jsonData.id);",
+                  "    console.log('Link post created with ID:', jsonData.id);",
+                  "    pm.test(\"Link post created successfully\", function() {",
+                  "        pm.expect(jsonData.id).to.be.a('number');",
+                  "        pm.expect(jsonData.post_type).to.equal('link');",
+                  "    });",
+                  "} else {",
+                  "    console.log('Failed to create link post');",
+                  "    pm.test(\"Link post not created\", function() {",
+                  "        pm.expect.fail('No post ID received in response');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Test Link Post\",\n    \"content\": \"This is a test link post\",\n    \"post_type\": \"link\",\n    \"metadata\": {\n        \"url\": \"https://example.com/resource\",\n        \"preview_image\": \"https://example.com/preview.jpg\"\n    }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ""]
+            },
+            "description": "Create a new link post with metadata"
+          }
+        },
+        {
+          "name": "Get Post Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{testPostId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{testPostId}}", ""]
+            },
+            "description": "Get details for a specific post"
+          }
+        },
+        {
+          "name": "Update Post",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated Post Title\",\n    \"content\": \"Updated content at {{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{testPostId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{testPostId}}", ""]
+            },
+            "description": "Update post content"
+          }
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{testPostId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{testPostId}}", ""]
+            },
+            "description": "Delete a post"
+          }
+        },
+        {
+          "name": "Like Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{testImagePostId}}/like/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{testImagePostId}}", "like", ""]
+            },
+            "description": "Like a post"
+          }
+        },
+        {
+          "name": "Unlike Post",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{testImagePostId}}/unlike/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{testImagePostId}}", "unlike", ""]
+            },
+            "description": "Remove like from a post"
+          }
+        },
+        {
+          "name": "Get News Feed",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/feed/?page=1&page_size=20&filter=all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feed", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                },
+                {
+                  "key": "filter",
+                  "value": "all"
+                }
+              ]
+            },
+            "description": "Get personalized news feed"
+          }
+        },
+        {
+          "name": "Get Filtered Feed by Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/feed/?page=1&page_size=20&filter=all&post_type=image",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feed", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                },
+                {
+                  "key": "filter",
+                  "value": "all"
+                },
+                {
+                  "key": "post_type",
+                  "value": "image"
+                }
+              ]
+            },
+            "description": "Get feed filtered by post type"
+          }
+        },
+        {
+          "name": "Get Liked Posts Feed",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/feed/?page=1&page_size=20&filter=liked",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feed", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                },
+                {
+                  "key": "filter",
+                  "value": "liked"
+                }
+              ]
+            },
+            "description": "Get feed of posts liked by the current user"
+          }
+        },
+        {
+          "name": "Get Own Posts Feed",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/feed/?page=1&page_size=20&filter=own",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feed", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                },
+                {
+                  "key": "filter",
+                  "value": "own"
+                }
+              ]
+            },
+            "description": "Get feed of posts created by the current user"
+          }
+        },
+        {
+          "name": "Get Metadata Filtered Feed",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/feed/?page=1&page_size=20&metadata_key=file_size&metadata_min=1000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "feed", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                },
+                {
+                  "key": "metadata_key",
+                  "value": "file_size"
+                },
+                {
+                  "key": "metadata_min",
+                  "value": "1000"
+                }
+              ]
+            },
+            "description": "Get feed filtered by metadata attributes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "description": "Endpoints for comment management",
+      "item": [
+        {
+          "name": "List Comments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/comments/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "comments", ""]
+            },
+            "description": "List all comments"
+          }
+        },
+        {
+          "name": "Create Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('testCommentId', jsonData.id);",
+                  "    console.log('Comment created with ID:', jsonData.id);",
+                  "    pm.test(\"Comment created successfully\", function() {",
+                  "        pm.expect(jsonData.id).to.be.a('number');",
+                  "    });",
+                  "} else {",
+                  "    console.log('Failed to create comment');",
+                  "    pm.test(\"Comment not created\", function() {",
+                  "        pm.expect.fail('No comment ID received in response');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"text\": \"This is a test comment at {{$timestamp}}\",\n    \"post\": {{testVideoPostId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/comments/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "comments", ""]
+            },
+            "description": "Create a new comment on a post"
+          }
+        },
+        {
+          "name": "Get Comment Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/comments/{{testCommentId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "comments", "{{testCommentId}}", ""]
+            },
+            "description": "Get details for a specific comment"
+          }
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"text\": \"Updated comment at {{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/comments/{{testCommentId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "comments", "{{testCommentId}}", ""]
+            },
+            "description": "Update comment text"
+          }
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/comments/{{testCommentId}}/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "comments", "{{testCommentId}}", ""]
+            },
+            "description": "Delete a comment"
+          }
+        },
+        {
+          "name": "Get Post Comments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{testVideoPostId}}/comments/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{testVideoPostId}}", "comments", ""]
+            },
+            "description": "Get all comments for a specific post"
+          }
+        },
+        {
+          "name": "Add Comment to Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData && jsonData.id) {",
+                  "    pm.environment.set('testDirectCommentId', jsonData.id);",
+                  "    console.log('Direct comment created with ID:', jsonData.id);",
+                  "    pm.test(\"Direct comment created successfully\", function() {",
+                  "        pm.expect(jsonData.id).to.be.a('number');",
+                  "    });",
+                  "} else {",
+                  "    console.log('Failed to create direct comment');",
+                  "    pm.test(\"Direct comment not created\", function() {",
+                  "        pm.expect.fail('No comment ID received in response');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Token {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"text\": \"This is a direct comment at {{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/{{testLinkPostId}}/comment/",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "{{testLinkPostId}}", "comment", ""]
+            },
+            "description": "Add a comment directly to a post"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documentation",
+      "description": "API documentation endpoints",
+      "item": [
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/swagger/",
+              "host": ["{{baseUrl}}"],
+              "path": ["swagger", ""]
+            },
+            "description": "View Swagger UI documentation"
+          }
+        },
+        {
+          "name": "Swagger JSON",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/swagger.json",
+              "host": ["{{baseUrl}}"],
+              "path": ["swagger.json"]
+            },
+            "description": "Get Swagger API specification in JSON format"
+          }
+        },
+        {
+          "name": "ReDoc UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/redoc/",
+              "host": ["{{baseUrl}}"],
+              "path": ["redoc", ""]
+            },
+            "description": "View ReDoc UI documentation"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "description": "Health check endpoint",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health/",
+              "host": ["{{baseUrl}}"],
+              "path": ["health", ""]
+            },
+            "description": "Check if API is running"
+          }
+        }
+      ]
+    }
+  ]
+}

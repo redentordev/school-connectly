@@ -1,0 +1,257 @@
+{
+  "info": {
+    "name": "Connectly API Auth Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Auth Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData && jsonData.token) {",
+              "    pm.environment.set('authToken', jsonData.token);",
+              "    console.log('Auth token saved:', jsonData.token);",
+              "} else {",
+              "    console.log('Failed to get auth token');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/token/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "token", ""]
+        }
+      }
+    },
+    {
+      "name": "List Users",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/users/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "users", ""]
+        }
+      }
+    },
+    {
+      "name": "Create Post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData && jsonData.id) {",
+              "    pm.environment.set('testPostId', jsonData.id);",
+              "    console.log('Post created with ID:', jsonData.id);",
+              "} else {",
+              "    console.log('Failed to create post');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Test Post\",\n    \"content\": \"This is a test post created at {{$timestamp}}\",\n    \"post_type\": \"text\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/posts/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "posts", ""]
+        }
+      }
+    },
+    {
+      "name": "List Posts",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/posts/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "posts", ""]
+        }
+      }
+    },
+    {
+      "name": "Create Image Post",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"Test Image Post\",\n    \"content\": \"This is a test image post\",\n    \"post_type\": \"image\",\n    \"metadata\": {\n        \"file_size\": 1024,\n        \"dimensions\": {\"width\": 800, \"height\": 600}\n    }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/posts/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "posts", ""]
+        }
+      }
+    },
+    {
+      "name": "Get Post Details",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/posts/{{testPostId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "posts", "{{testPostId}}"]
+        }
+      }
+    },
+    {
+      "name": "Create Comment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData && jsonData.id) {",
+              "    pm.environment.set('testCommentId', jsonData.id);",
+              "    console.log('Comment created with ID:', jsonData.id);",
+              "} else {",
+              "    console.log('Failed to create comment');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"text\": \"This is a test comment\",\n    \"post\": {{testPostId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/comments/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "comments", ""]
+        }
+      }
+    },
+    {
+      "name": "Get Post Comments",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/posts/{{testPostId}}/comments/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "posts", "{{testPostId}}", "comments", ""]
+        }
+      }
+    },
+    {
+      "name": "Like Post",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/posts/{{testPostId}}/like/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "posts", "{{testPostId}}", "like", ""]
+        }
+      }
+    },
+    {
+      "name": "Get News Feed",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/feed/",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "feed", ""]
+        }
+      }
+    }
+  ]
+} 
