@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Post, Comment
-from .serializers import UserSerializer, PostSerializer, CommentSerializer
+from .models import Post, Comment, Like
+from .serializers import UserSerializer, PostSerializer, CommentSerializer, LikeSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,6 +19,7 @@ from django.contrib.auth.models import User
 from rest_framework.exceptions import PermissionDenied
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.pagination import PageNumberPagination
 
 logger = LoggerSingleton().get_logger()
 config = ConfigManager()
@@ -218,6 +219,11 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CommentPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 class PostViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing posts.
@@ -372,7 +378,17 @@ class PostViewSet(viewsets.ModelViewSet):
                         "status": "post liked"
                     }
                 }
-            )
+            ),
+            201: openapi.Response(
+                description="Post liked successfully",
+                examples={
+                    "application/json": {
+                        "status": "post liked"
+                    }
+                }
+            ),
+            400: openapi.Response(description="Bad request"),
+            409: openapi.Response(description="Already liked")
         }
     )
     @action(detail=True, methods=['post'])
@@ -380,10 +396,110 @@ class PostViewSet(viewsets.ModelViewSet):
         try:
             post = self.get_object()
             user = request.user
+            
+            # Check if user already liked this post
+            if Like.objects.filter(user=user, post=post).exists():
+                return Response({'status': 'already liked'}, status=status.HTTP_409_CONFLICT)
+            
+            # Create like
+            like = Like.objects.create(user=user, post=post)
             logger.info(f"User {user.id} liked post {post.id}")
-            return Response({'status': 'post liked'})
+            return Response({'status': 'post liked'}, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error(f"Error liking post: {str(e)}")
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        method='delete',
+        operation_description="Unlike a post",
+        responses={
+            204: openapi.Response(description="Post unliked successfully"),
+            404: openapi.Response(description="Like not found")
+        }
+    )
+    @action(detail=True, methods=['delete'])
+    def unlike(self, request, pk=None):
+        try:
+            post = self.get_object()
+            user = request.user
+            
+            # Find and delete the like
+            like = Like.objects.filter(user=user, post=post).first()
+            if not like:
+                return Response({'error': 'Like not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+            like.delete()
+            logger.info(f"User {user.id} unliked post {post.id}")
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            logger.error(f"Error unliking post: {str(e)}")
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Get comments for a post",
+        responses={
+            200: CommentSerializer(many=True)
+        },
+        manual_parameters=[
+            openapi.Parameter(
+                'page',
+                openapi.IN_QUERY,
+                description="Page number",
+                type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'page_size',
+                openapi.IN_QUERY,
+                description="Number of items per page",
+                type=openapi.TYPE_INTEGER
+            )
+        ]
+    )
+    @action(detail=True, methods=['get'])
+    def comments(self, request, pk=None):
+        try:
+            post = self.get_object()
+            comments = Comment.objects.filter(post=post).order_by('-created_at')
+            
+            # Paginate results
+            paginator = CommentPagination()
+            paginated_comments = paginator.paginate_queryset(comments, request)
+            serializer = CommentSerializer(paginated_comments, many=True)
+            
+            return paginator.get_paginated_response(serializer.data)
+        except Exception as e:
+            logger.error(f"Error retrieving comments: {str(e)}")
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        method='post',
+        operation_description="Add a comment to a post",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['text'],
+            properties={
+                'text': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            201: CommentSerializer()
+        }
+    )
+    @action(detail=True, methods=['post'])
+    def comment(self, request, pk=None):
+        try:
+            post = self.get_object()
+            serializer = CommentSerializer(data={'text': request.data.get('text'), 'post': post.id})
+            
+            if serializer.is_valid():
+                serializer.save(author=request.user, post=post)
+                logger.info(f"User {request.user.id} commented on post {post.id}")
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error adding comment: {str(e)}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
