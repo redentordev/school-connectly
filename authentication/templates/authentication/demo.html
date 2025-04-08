@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectly - Google OAuth Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #4285F4;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .profile {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            width: 100%;
+        }
+        .profile img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .profile-info {
+            margin-top: 10px;
+        }
+        .google-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+        }
+        button {
+            margin-top: 20px;
+            padding: 8px 16px;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .instructions {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .debug {
+            background-color: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ffcc80;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Connectly - Google OAuth Demo</h1>
+        <p>This page demonstrates how to use Google OAuth with the Connectly API.</p>
+
+        <div class="instructions">
+            <h3>How to use this demo:</h3>
+            <ol>
+                <li>Click the "Login with Google" button below</li>
+                <li>Sign in with your Google account</li>
+                <li>You'll be redirected back here with an access token</li>
+                <li>The API response will show your user details and an API token</li>
+                <li>You can use this token for authenticated API requests</li>
+            </ol>
+        </div>
+
+        <div class="debug">
+            <h3>Debug Information</h3>
+            <p><strong>OAuth URL:</strong> <span id="oauth-url">{{ oauth_url }}</span></p>
+            <p>If you get a "redirect_uri_mismatch" error, make sure the redirect URI in your Google Cloud Console matches exactly:</p>
+            <pre>http://localhost:8000/api/auth/callback/</pre>
+        </div>
+
+        <a href="{{ oauth_url }}" class="google-btn">Login with Google</a>
+
+        <div class="profile" id="profile">
+            <img id="profile-img" src="" alt="Profile Picture">
+            <div class="profile-info">
+                <h2 id="profile-name"></h2>
+                <p id="profile-email"></p>
+                <p><strong>Token:</strong> <span id="profile-token"></span></p>
+            </div>
+            <button id="logout-btn">Logout</button>
+        </div>
+
+        <h2>API Response</h2>
+        <pre id="api-response">Login to see the API response</pre>
+    </div>
+
+    <script>
+        // Function to get query parameters from URL
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Handle the access token if present in URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = getQueryParam('token');
+            const error = getQueryParam('error');
+            
+            if (error) {
+                document.getElementById('api-response').textContent = 'Error: ' + error;
+            } else if (token) {
+                document.getElementById('api-response').textContent = 'Processing token: ' + token.substring(0, 10) + '...';
+                
+                // Send token to backend
+                fetch('/api/auth/google/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        access_token: token
+                    })
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    // Display the response
+                    document.getElementById('api-response').textContent = JSON.stringify(data, null, 2);
+                    
+                    // If successful, store the token and display profile
+                    if (data.token) {
+                        localStorage.setItem('connectly_token', data.token);
+                        
+                        // Display profile information
+                        document.getElementById('profile').style.display = 'block';
+                        document.getElementById('profile-img').src = data.picture || 'https://via.placeholder.com/100';
+                        document.getElementById('profile-name').textContent = data.first_name + ' ' + data.last_name;
+                        document.getElementById('profile-email').textContent = data.email;
+                        document.getElementById('profile-token').textContent = data.token;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('api-response').textContent = 'Error: ' + error.message;
+                });
+            } else {
+                // Check if user is already logged in
+                const storedToken = localStorage.getItem('connectly_token');
+                if (storedToken) {
+                    document.getElementById('api-response').textContent = 'Already logged in with token: ' + storedToken;
+                }
+            }
+        });
+
+        // Logout function
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('connectly_token');
+            document.getElementById('profile').style.display = 'none';
+            document.getElementById('api-response').textContent = 'Logged out';
+        });
+    </script>
+</body>
+</html> 

@@ -51,6 +51,8 @@ urlpatterns = [
     
     # Auth endpoints
     path('api/auth/token/', csrf_exempt(obtain_auth_token), name='api-token-auth'),
+    path('api/auth/', include('authentication.urls')),  # Google OAuth
+    path('api/auth/', include('dj_rest_auth.urls')),  # Regular authentication endpoints
     
     # API endpoints
     path('api/', include('posts.urls')),
