@@ -6,11 +6,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=connectly
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=${POSTGRES_DB:-connectly}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     networks:
       - connectly_network
+    restart: unless-stopped
 
   web:
     build: .
@@ -19,7 +20,7 @@ services:
       - media_volume:/app/media
       - .:/app # Mount the current directory for development
     ports:
-      - "8000:8000"
+      - "${WEB_PORT:-8000}:8000"
     env_file:
       - .env
     environment:

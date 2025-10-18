@@ -25,16 +25,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Create directory for static files and set permissions
-RUN mkdir -p /app/staticfiles && \
-    chmod -R 755 /app/staticfiles
+# Create directories for static files and logs
+RUN mkdir -p /app/staticfiles /app/logs && \
+    chmod -R 755 /app/staticfiles /app/logs
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
 # Create non-root user and set permissions
 RUN useradd -m appuser && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app && \
+    touch /app/logs/connectly.log && \
+    chown appuser:appuser /app/logs/connectly.log
 USER appuser
 
 # Run gunicorn

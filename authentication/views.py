@@ -12,6 +12,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from allauth.socialaccount.models import SocialAccount
 from singletons.logger_singleton import LoggerSingleton
+from connectly.rate_limiters import rate_limit_auth
 
 logger = LoggerSingleton().get_logger()
 
@@ -20,18 +21,23 @@ logger = LoggerSingleton().get_logger()
 def oauth_demo(request):
     """Render the Google OAuth demo page."""
     # Use the exact values from the Google credentials JSON
-    auth_uri = "https://accounts.google.com/o/oauth2/auth"  # From the JSON
-    client_id = "135591834469-2eh68nfpmuj5afhfqoi20fk816nmr04r.apps.googleusercontent.com"  # From the JSON
+    auth_uri = "https://accounts.google.com/o/oauth2/auth"
+    
+    # Get client ID from settings (configured via environment variables)
+    try:
+        client_id = settings.SOCIALACCOUNT_PROVIDERS['google']['APP']['client_id']
+    except (KeyError, AttributeError):
+        logger.error("Google OAuth client ID not configured in settings")
+        client_id = None
     
     # Get the current hostname for the redirect_uri
     host = request.get_host()
     protocol = 'https' if request.is_secure() else 'http'
     redirect_uri = f"{protocol}://{host}/api/auth/callback/"
     
-    # Print for debugging
-    print(f"Auth URI: {auth_uri}")
-    print(f"Client ID: {client_id}")
-    print(f"Redirect URI: {redirect_uri}")
+    # Log for debugging (without exposing full client ID)
+    logger.info(f"OAuth demo requested: Auth URI: {auth_uri}")
+    logger.info(f"Redirect URI: {redirect_uri}")
     
     # Build params exactly as Google expects
     params = {
@@ -60,12 +66,15 @@ def oauth_callback(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@rate_limit_auth
 def google_login(request):
     """
     Endpoint to handle Google OAuth login.
     
     Expects a token from the Google OAuth process.
     Returns a DRF token for authenticated API access.
+    
+    Rate Limited: 5 requests per minute, 20 per hour per IP.
     """
     # Validate input
     if 'access_token' not in request.data:
@@ -84,7 +93,7 @@ def google_login(request):
         )
         
         if not google_response.ok:
-            logger.error(f"Failed to verify Google token: {google_response.text}")
+            logger.error(f"Failed to verify Google token: Status {google_response.status_code}")
             return Response(
                 {'error': 'Invalid Google token'}, 
                 status=status.HTTP_401_UNAUTHORIZED

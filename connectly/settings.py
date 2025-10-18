@@ -21,17 +21,34 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Validate environment variables (can be skipped with SKIP_ENV_VALIDATION=1)
+if not os.getenv('SKIP_ENV_VALIDATION'):
+    from connectly.env_validator import validate_environment, get_secret_key, get_debug_mode, get_allowed_hosts
+    try:
+        validate_environment()
+    except Exception as e:
+        import sys
+        sys.stderr.write(f"\n\033[91mEnvironment Validation Error:\033[0m {e}\n\n")
+        # In development, allow to continue with warnings
+        if os.getenv('DEBUG', 'False').lower() not in ('true', '1', 't'):
+            raise
+else:
+    from connectly.env_validator import get_secret_key, get_debug_mode, get_allowed_hosts
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-zkktfou^524j17gl)o#1rws#6xmqvwkm4co6q%b0mvyiziq)p2')
+# No fallback value - SECRET_KEY must be set in environment
+SECRET_KEY = get_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(os.getenv('DEBUG', '1'))
+# Defaults to False for security
+DEBUG = get_debug_mode()
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', os.getenv('django_allowed_hosts', '')).split()
+# ALLOWED_HOSTS must be configured properly
+ALLOWED_HOSTS = get_allowed_hosts()
 
 
 # Application definition
@@ -66,6 +83,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'connectly.middleware.SecurityHeadersMiddleware',  # Add security headers
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -74,7 +92,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',  # Add this line for django-allauth
+    'allauth.account.middleware.AccountMiddleware',
+    'connectly.middleware.RateLimitLoggingMiddleware',  # Monitor rate limit violations
 ]
 
 ROOT_URLCONF = 'connectly.urls'
@@ -154,17 +173,22 @@ os.makedirs(STATIC_ROOT, exist_ok=True)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Cache settings
+# Cache settings - Using LocMemCache (in-memory) for simplicity
+# Note: This cache is per-process. For multi-server deployments, consider Redis.
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': os.path.join(BASE_DIR, 'django_cache'),
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'connectly-cache',
         'TIMEOUT': 300,  # 5 minutes default cache timeout
         'OPTIONS': {
-            'MAX_ENTRIES': 1000
+            'MAX_ENTRIES': 10000,  # Maximum number of cache entries
         }
     }
 }
+
+# Rate limiting settings
+RATELIMIT_ENABLE = not DEBUG  # Disable rate limiting in debug mode for development
+RATELIMIT_USE_CACHE = 'default'
 
 # Security Settings
 SECURE_SSL_REDIRECT = bool(int(os.getenv('SECURE_SSL_REDIRECT', '1')))
@@ -323,6 +347,80 @@ REST_AUTH = {
     'USE_JWT': False,
     'TOKEN_MODEL': 'rest_framework.authtoken.models.Token',
     'SESSION_LOGIN': True,
+}
+
+# Logging Configuration with Sensitive Data Filtering
+# Ensure logs directory exists
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+# Ensure log file exists with proper permissions
+LOG_FILE = os.path.join(LOGS_DIR, 'connectly.log')
+if not os.path.exists(LOG_FILE):
+    try:
+        open(LOG_FILE, 'a').close()
+    except:
+        pass  # If we can't create it, logging will fall back to console only
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'sensitive_data_filter': {
+            '()': 'connectly.logging_filters.SensitiveDataFilter',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'filters': ['sensitive_data_filter'],
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_FILE,
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 5,
+            'filters': ['sensitive_data_filter'],
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'connectly_logger': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'authentication': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'posts': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
 }
 
 # Import local settings if they exist

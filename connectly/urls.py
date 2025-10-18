@@ -23,6 +23,14 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authtoken.views import obtain_auth_token
 from django.http import HttpResponse
+from connectly.rate_limiters import rate_limit_auth
+
+# Custom error handlers (only in production)
+if not settings.DEBUG:
+    handler404 = 'connectly.views.custom_404'
+    handler500 = 'connectly.views.custom_500'
+    handler403 = 'connectly.views.custom_403'
+    handler400 = 'connectly.views.custom_400'
 
 # Construct the server URL
 PROTOCOL = "https"  # Force HTTPS
@@ -46,11 +54,16 @@ schema_view = get_schema_view(
 def health_check(request):
     return HttpResponse("OK")
 
+# Wrap the token auth view with rate limiting
+@rate_limit_auth
+def rate_limited_token_auth(request):
+    return obtain_auth_token(request)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     
     # Auth endpoints
-    path('api/auth/token/', csrf_exempt(obtain_auth_token), name='api-token-auth'),
+    path('api/auth/token/', csrf_exempt(rate_limited_token_auth), name='api-token-auth'),
     path('api/auth/', include('authentication.urls')),  # Google OAuth
     path('api/auth/', include('dj_rest_auth.urls')),  # Regular authentication endpoints
     

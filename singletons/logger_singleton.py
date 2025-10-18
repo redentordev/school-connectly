@@ -32,6 +32,14 @@ class LoggerSingleton:
         if not os.path.exists('logs'):
             os.makedirs('logs')
 
+        # Import sensitive data filter
+        try:
+            from connectly.logging_filters import SensitiveDataFilter
+            sensitive_filter = SensitiveDataFilter()
+        except ImportError:
+            # Fallback if filter not available
+            sensitive_filter = None
+
         # Create console handler
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.INFO)
@@ -39,16 +47,27 @@ class LoggerSingleton:
             '%(asctime)s - %(levelname)s - %(message)s'
         )
         console_handler.setFormatter(console_formatter)
+        
+        # Add sensitive data filter to console handler
+        if sensitive_filter:
+            console_handler.addFilter(sensitive_filter)
 
-        # Create file handler
-        file_handler = logging.FileHandler(
-            f'logs/connectly_{datetime.now().strftime("%Y%m%d")}.log'
+        # Create file handler with rotation
+        from logging.handlers import RotatingFileHandler
+        file_handler = RotatingFileHandler(
+            f'logs/connectly_{datetime.now().strftime("%Y%m%d")}.log',
+            maxBytes=10485760,  # 10MB
+            backupCount=5
         )
         file_handler.setLevel(logging.INFO)
         file_formatter = logging.Formatter(
             '%(asctime)s - %(levelname)s - [%(name)s] - %(message)s'
         )
         file_handler.setFormatter(file_formatter)
+        
+        # Add sensitive data filter to file handler
+        if sensitive_filter:
+            file_handler.addFilter(sensitive_filter)
 
         # Add handlers to logger
         self.logger.addHandler(console_handler)
